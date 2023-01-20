@@ -1,0 +1,43 @@
+/* Global */
+:root {
+    background-color: #36393f;
+    /* --aqua-green: #9DD9D2;
+    --sunshine-yellow: #F4D06F;
+    --sepia: #767522;
+    --pearly-pink: #FFF8F0; */
+}
+
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    box-sizing: border-box;
+    font-size: 0;
+    font-weight: bold;
+    color: #dcddde;
+    font-family: 'Noto Sans TC';
+}
+
+/* General */
+.pointer {
+    cursor: pointer;
+}
+
+/* ==================================== */
+.container {
+    display:flex;
+    width: 100%;
+    /* margin: 30px auto 0;
+    max-width: 1200px;
+    border: 2px solid grey;
+    padding: 10px; */
+}
+
+.sidebar {
+    width: 240px;
+    height: 100vh;
+    padding-right: 3px;
+    background-color: #2f3136;
+}
+
