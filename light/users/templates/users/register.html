@@ -11,12 +11,11 @@
 </head>
 <body>
     <div class="container">
-        <div class="login-box">
+        <div class="register-box">
             <div class="header">
-                <h1>歡迎回來！</h1>
-                <div class="text">我們很高興又見到您了！</div>
+                <h1>建立新帳號</h1>
             </div>
-            <div class="main-login-container">
+            <div class="main-register-container">
                 <form action="">
                     {% csrf_token %}
                     <div class="email">
@@ -24,23 +23,27 @@
                         <span for="" class="input-message required-message">*</span>
                         <input type="email" id="email" autocomplete="username" required />
                     </div>
+                    <div class="username">
+                        <label for="">使用者名稱</label>
+                        <span for="" class="input-message required-message">*</span>
+                        <input type="username" id="username" autocomplete="username" required />
+                    </div>
                     <div class="password">
                         <label for="">密碼</label>
                         <span for="" class="input-message required-message">*</span>
                         <input type="password" id="password" autocomplete="current-password" required />
                     </div>
-                    <div class="forget-password">
-                        <a class="forget-password-button link" href="#">忘記您的密碼？</a>
+                    <input type="submit" class="pointer" id="submit" value="繼續" />
+                    <div class="have-owned-account">
+                        <a class="have-owned-account-button link" href="/login">已經有一個帳號？</a>
                     </div>
-                    <input type="submit" class="pointer" id="submit" value="提交" />
-                    <div class="no-account">
-                        <span class="text">需要一個帳號？</span>
-                        <a class="signup-button link" href="/register">註冊</a>
+                    <div class="agree">
+                        註冊即代表同意 Light 的 <span class="link">服務條款</span> 及 <span class="link">隱私權政策</span>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    <script src="{% static 'users/js/login.js' %}"></script>
+    <script src="{% static 'users/js/register.js' %}"></script>
 </body>
 </html>

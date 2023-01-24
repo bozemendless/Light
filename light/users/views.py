@@ -1,18 +1,47 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import JsonResponse
 from .models import User
+import json
 
-def index(request):
+def login_page(request):
     return render(request, 'users/login.html')  
 
-def log_in(request):
+def register_page(request):
+    return render(request, 'users/register.html')  
+
+def login(request):
     if request.method == 'POST':
 
         user = User()
 
-        User.username = request.POST.get('username')
-        User.password = request.POST.get('password')
-        return HttpResponse("Hello, world. You're at the polls index.")
+        request_body = json.loads(request.body)
+        
+        user.email = request_body['email']
+        user.password = request_body['password']
 
-def sign_up(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+        print(user)
+
+        res = {
+            'ok': True
+        }
+
+        return JsonResponse(res)
+
+def register(request):
+
+    if request.method == "POST":
+        user = User()
+
+        request_body = json.loads(request.body)
+        
+        user.email = request_body['email']
+        user.username = request_body['username']
+        user.password = request_body['password']
+
+        print(user) # default username
+
+        res = {
+            'ok': True
+        }
+
+        return JsonResponse(res)
