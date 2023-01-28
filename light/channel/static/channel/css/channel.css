@@ -1,0 +1,185 @@
+/* Global */
+:root {
+    background-color: #36393f;
+    /* --aqua-green: #9DD9D2;
+    --sunshine-yellow: #F4D06F;
+    --sepia: #767522;
+    --pearly-pink: #FFF8F0; */
+}
+
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    box-sizing: border-box;
+    font-size: 0;
+    font-weight: bold;
+    color: #dcddde;
+    font-family: "gg sans",
+        "Microsoft JhengHei",
+        "微軟正黑體",
+        "Microsoft JhengHei UI",
+        "Microsoft YaHei",
+        "微軟雅黑",
+        "宋体",
+        "SimSun",
+        "Noto Sans",
+        "Helvetica Neue",
+        Helvetica,
+        Arial,
+        sans-serif;
+    outline: none;
+    border: 0;
+    user-select: none;
+}
+
+/* General */
+.pointer {
+    cursor: pointer;
+}
+
+/* ==================================== */
+.container {
+    display:flex;
+    width: 100%;
+}
+
+.sidebar {
+    width: 240px;
+    height: 100vh;
+    padding-right: 3px;
+    background-color: #2f3136;
+}
+
+.channel-name {
+    font-size: 18px;
+    text-align: center;
+    padding-top: 10px;
+    height: 50px;
+    border-bottom: 2px solid #292b30;
+    font-weight: bold;
+    color: #fff;
+}
+
+/* ====== */
+
+main {
+    width: 100%;
+}
+
+.main-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.name-block {
+    display: flex;
+    width: 100%;
+    height: 50px;
+    border-bottom: 2px solid #292b30;
+}
+
+#label-username {
+    font-size: 22px;
+    color: #fff;
+    margin: 10px;
+}
+
+.channel-label {
+    font-size: 12px;
+    color: #8e9297;
+    margin: 5px;
+}
+
+.channel-label:hover {
+    color: #d3d4d5;
+    
+}
+
+.channel-name-label {
+    width: calc(100% - 20px);
+    height: 30px;
+    font-size: 16px;
+    color: #8e9297;
+    cursor: pointer;
+    margin: auto;
+    font-weight: 400;
+    border-radius: 3px;
+    line-height: 30px;
+    padding-left: 4px;
+}
+
+.channel-name-label:hover {
+    background-color: #3c3f45;
+    color:#d3d4d5;
+}
+
+#username {
+    width: 120px;
+    height: 30px;
+    font-size: 10px;
+    margin: 10px;
+    padding: 5px;
+    color: #fff;
+    background-color: #40444b;
+}
+
+.videos-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.local-video-wrapper {
+    position: relative;
+}
+
+.video-wrapper {
+    width: 100%;
+}
+
+#local-video {
+    display: none;
+}
+
+.video {
+    margin: 10px auto;
+    border-radius: 5px;
+}
+
+.toggles {
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.toggle {
+    width: 50px;
+    height: 50px;
+    display: none;
+    font-size: 12px;
+    border-radius: 50%;
+    color: #292b30;
+    cursor: pointer;
+}
+
+#msg {
+    width: calc(100% - 30px);
+    margin: auto;
+    height: 50px;
+    display: block;
+    background-color: #40444b;
+    margin-bottom: 25px;
+    font-size: 16px;
+    padding: 20px;
+    color: #d3d4d5;
+    border-radius: 10px;
+    font-weight: 400;
+}

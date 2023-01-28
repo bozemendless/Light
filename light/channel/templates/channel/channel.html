@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'channel/css/channel.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static '/light/favicon.ico' %}" />
+    <title>Light | 好友</title>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="searchBar">
+            </div>
+            <div class="channel-name">
+                Test_channel
+            </div>
+            <div class="text-channel">
+                <div class="text-channel-label channel-label">⌵ 文字頻道</div> 
+            </div>
+            <div class="voice-channel">
+                <div class="voice-channel-label channel-label">⌵ 語音頻道</div>
+                <div class="channel-name-label" id="btn-join">🔊 一般</div>
+            </div>
+            
+        </div>
+        <main>
+            <div class="main-container">
+                <div class="name-block">
+                    <h3 id="label-username"></h3>
+                    <input type="text" id="username">
+
+                </div>
+
+                <div class="videos-container">
+                    <div id="video-container">
+                        <div class="video-wrapper local-video-wrapper">
+                            <video class="video" id="local-video" autoplay playsinline></video>
+                            <div class="toggles">
+                                <button class="toggle" id="btn-toggle-audio">🔈</br>Mute</button>
+                            <button class="toggle" id="btn-toggle-video">📹</br>Off</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="chat">
+                        <h3>chat</h3>
+                        <div id="messages">
+                            <ul id="message-list"></ul>
+                        </div>
+
+                        <div>
+                            <input id="msg" type="text" placeholder="傳送訊息到 @bozemendless">
+                            {% comment %} <button id="btn-send-message">send message</button>
+                            <button id="btn-share-screen">share screen</button> {% endcomment %}
+                        </div>
+                    </div>
+                </div>
+        </main>
+    </div>
+    <script src="{% static 'channel/js/channel.js' %}"></script>
+</body>
+</html>
