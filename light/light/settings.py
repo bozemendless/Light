@@ -9,6 +9,7 @@ user = os.getenv('RDS_DB_USER')
 password = os.getenv('RDS_DB_PASSWORD')
 database = os.getenv('RDS_DB_NAME')
 port = os.getenv('RDS_DB_PORT')
+docker_gateway = os.getenv('DOCKER_GATEWAY')
 
 # access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
 # secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
@@ -169,6 +170,9 @@ ASGI_APPLICATION = 'light.asgi.application'
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(docker_gateway, 6379)],
+        },
     },
 }
