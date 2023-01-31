@@ -104,6 +104,7 @@ form .required-message {
 
 form .error-message {
     color: var(--error-message-color);
+    font-style: italic;
 }
 
 
