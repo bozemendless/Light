@@ -9,8 +9,7 @@ const emailInputMessage = document.querySelector(".email .input-message");
 const usernameInputMessage = document.querySelector(".username .input-message");
 const passwordInputMessage = document.querySelector(".password .input-message");
 
-
-submit.addEventListener("click", event => {
+submit.addEventListener("click", (event) => {
     event.preventDefault();
 
     email = emailInput.value;
@@ -27,7 +26,8 @@ submit.addEventListener("click", event => {
 // if valid return true
 // if invalid, show the warning message, return false
 function checkTheField() {
-    const emailRegex = /^(?=.{8,64}$)\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
+    const emailRegex =
+        /^(?=.{8,64}$)\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
     const usernameRegex = /^[A-Za-z0-9]{2,32}$/;
     const passwordRegex = /^.{6,72}$/;
     let isEmailValid;
@@ -52,7 +52,7 @@ function checkTheField() {
         usernameInputMessage.textContent = "請輸入使用者名稱。";
         usernameInputMessage.classList.add("error-message");
     } else if (!usernameRegex.test(username)) {
-        usernameInputMessage.textContent = "長度必須在 2 和 32 之間。"
+        usernameInputMessage.textContent = "長度必須在 2 和 32 之間。";
         usernameInputMessage.classList.add("error-message");
     } else {
         usernameInputMessage.textContent = "";
@@ -64,7 +64,7 @@ function checkTheField() {
         passwordInputMessage.textContent = "請輸入密碼。";
         passwordInputMessage.classList.add("error-message");
     } else if (!passwordRegex.test(password)) {
-        passwordInputMessage.textContent = "密碼必須在 6 和 72 之間。"
+        passwordInputMessage.textContent = "密碼必須在 6 和 72 之間。";
         passwordInputMessage.classList.add("error-message");
     } else {
         passwordInputMessage.textContent = "";
@@ -76,17 +76,17 @@ function checkTheField() {
         isValid = true;
     }
 
-    return isValid
+    return isValid;
 }
 
 // get register infos
 function getInfos() {
     const infos = JSON.stringify({
-        "email": email,
-        "username": username,
-        "password": password
-    })
-    return infos
+        email: email,
+        username: username,
+        password: password,
+    });
+    return infos;
 }
 
 // send register info
@@ -98,13 +98,13 @@ async function registerFetch(info) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": token
+            "X-CSRFToken": token,
         },
-        body: info
-    }
+        body: info,
+    };
 
     try {
-        const response = await fetch (registerUrl, options);
+        const response = await fetch(registerUrl, options);
         const data = await response.json();
         registerResult(data);
     } catch (error) {
@@ -112,13 +112,12 @@ async function registerFetch(info) {
     }
 }
 
-
 function registerResult(data) {
     let message;
     if (data.ok) {
-        message = "註冊成功，請登入會員帳號！"
+        message = "註冊成功，請登入會員帳號！";
         alert(message);
-        location.href = "/login"
+        location.href = "/login";
     }
     if (data.message === "email already exists") {
         emailInputMessage.textContent = "電子信箱已被使用。";
