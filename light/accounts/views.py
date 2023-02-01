@@ -1,26 +1,22 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import User
 import json
 import re
+from .models import Account
 
 def login_page(request):
-    return render(request, 'users/login.html')  
+    return render(request, 'accounts/login.html')  
 
 def register_page(request):
-    return render(request, 'users/register.html')  
+    return render(request, 'accounts/register.html')  
 
 def login(request):
-    if request.method == 'POST':
+    if request.method == 'PUT':
 
-        user = User()
-
-        request_body = json.loads(request.body)
+        account = Account()
         
-        user.email = request_body['email']
-        user.password = request_body['password']
+        print(request.body)
 
-        print(user)
 
         res = {
             'ok': True
@@ -32,9 +28,9 @@ def register(request):
 
     if request.method == 'POST':
 
-        try:
+        # try:
             # Parse the form
-            infos = json.loads(request.POST.get('infos'))
+            infos = json.loads(request.body)
             email = infos['email']
             username = infos['username']
             password = infos['password']
@@ -57,8 +53,8 @@ def register(request):
                 return JsonResponse(res, status=400)
 
             # Check if account exist or field not unique
-            is_email_exists = User.objects.filter(email=email).exists()
-            is_username_exists = User.objects.filter(username=username).exists()
+            is_email_exists = Account.objects.filter(email=email).exists()
+            is_username_exists = Account.objects.filter(username=username).exists()
 
             if is_email_exists or is_username_exists:
                 if is_email_exists:
@@ -74,13 +70,13 @@ def register(request):
                 return JsonResponse(res, status=400)
 
             # New account register
-            user = User()
+            account = Account()
 
-            user.email = infos['email']
-            user.username = infos['username']
-            user.password = infos['password']
+            account.email = infos['email']
+            account.username = infos['username']
+            account.password = infos['password']
 
-            user.save()
+            account.save()
 
             res = {
                 'ok': False
@@ -88,10 +84,10 @@ def register(request):
 
             return JsonResponse(res)
 
-        except:
-            error = 'Internal Server Error'
-            res = {
-                'error':True,
-                'message': error
-            }
-            return JsonResponse(res, status=500)
+        # except:
+        #     error = 'Internal Server Error'
+        #     res = {
+        #         'error':True,
+        #         'message': error
+        #     }
+        #     return JsonResponse(res, status=500)

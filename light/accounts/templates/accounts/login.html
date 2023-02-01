@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% load static %}
-    <link rel="stylesheet" href="{% static 'users/css/users.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/accounts.css' %}">
     <link rel="shortcut icon" type="image/png" href="{% static '/light/favicon.ico' %}" />
     <title>Light | 歡迎回來！</title>
 </head>
@@ -22,12 +22,12 @@
                     <div class="email">
                         <label for="">電子郵件</label>
                         <span for="" class="input-message required-message">*</span>
-                        <input type="email" id="email" autocomplete="username" required />
+                        <input type="email" id="email" autocomplete="off" required />
                     </div>
                     <div class="password">
                         <label for="">密碼</label>
                         <span for="" class="input-message required-message">*</span>
-                        <input type="password" id="password" autocomplete="current-password" required />
+                        <input type="password" id="password" autocomplete="off" required />
                     </div>
                     <div class="forget-password">
                         <a class="forget-password-button link" href="#">忘記您的密碼？</a>
@@ -41,6 +41,6 @@
             </div>
         </div>
     </div>
-    <script src="{% static 'users/js/login.js' %}"></script>
+    <script src="{% static 'accounts/js/login.js' %}"></script>
 </body>
 </html>

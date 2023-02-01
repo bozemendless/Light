@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% load static %}
-    <link rel="stylesheet" href="{% static 'users/css/users.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/accounts.css' %}">
     <link rel="shortcut icon" type="image/png" href="{% static '/light/favicon.ico' %}" />
     <title>Light | 建立新帳號</title>
 </head>
@@ -21,17 +21,17 @@
                     <div class="email">
                         <label for="">電子郵件</label>
                         <span for="" class="input-message required-message">*</span>
-                        <input type="email" id="email" autocomplete="username" maxlength="64" required />
+                        <input type="email" id="email" autocomplete="off" maxlength="64" required />
                     </div>
                     <div class="username">
                         <label for="">使用者名稱</label>
                         <span for="" class="input-message required-message">*</span>
-                        <input type="username" id="username" autocomplete="username" maxlength="32" required />
+                        <input type="username" id="username" autocomplete="off" maxlength="32" required />
                     </div>
                     <div class="password">
                         <label for="">密碼</label>
                         <span for="" class="input-message required-message">*</span>
-                        <input type="password" id="password" autocomplete="current-password" maxlenth="72" required />
+                        <input type="password" id="password" autocomplete="off" maxlenth="72" required />
                     </div>
                     <input type="submit" class="pointer" id="submit" value="繼續" />
                     <div class="have-owned-account">
@@ -44,6 +44,6 @@
             </div>
         </div>
     </div>
-    <script src="{% static 'users/js/register.js' %}"></script>
+    <script src="{% static 'accounts/js/register.js' %}"></script>
 </body>
 </html>

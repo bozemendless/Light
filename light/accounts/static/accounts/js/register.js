@@ -5,7 +5,6 @@ const passwordInput = document.getElementById("password");
 let email;
 let username;
 let password;
-const formData = new FormData();
 const emailInputMessage = document.querySelector(".email .input-message");
 const usernameInputMessage = document.querySelector(".username .input-message");
 const passwordInputMessage = document.querySelector(".password .input-message");
@@ -19,8 +18,8 @@ submit.addEventListener("click", event => {
     password = passwordInput.value;
 
     if (checkTheField()) {
-        appendData();
-        registerFetch(formData);
+        const infos = getInfos();
+        registerFetch(infos);
     }
 });
 
@@ -80,14 +79,14 @@ function checkTheField() {
     return isValid
 }
 
-// append register info into formData
-function appendData() {
-    const infos = {
+// get register infos
+function getInfos() {
+    const infos = JSON.stringify({
         "email": email,
         "username": username,
         "password": password
-    }
-    formData.append("infos", JSON.stringify(infos));
+    })
+    return infos
 }
 
 // send register info

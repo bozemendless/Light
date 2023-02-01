@@ -48,7 +48,7 @@ function registerFetch(info) {
         const loginUrl = "/api/login";
 
         const options = {
-            method: "POST",
+            method: "PUT",
             headers: {
                 "X-CSRFToken": token,
                 "content-type": "application/json"

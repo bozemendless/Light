@@ -41,9 +41,6 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.shichenx.com'
 ]
 
-# Auth custom model
-AUTH_USER_MODEL = 'users.User'
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -54,12 +51,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'channel.apps.ChannelConfig',
-    'chats.apps.ChatsConfig',
-    'users.apps.UsersConfig',
+    'channel',
+    'chats',
+    'accounts',
     'storages',
     'corsheaders',
-    # 'channels',
 ]
 
 MIDDLEWARE = [
