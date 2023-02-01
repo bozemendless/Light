@@ -1,34 +1,92 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 import json
 import re
 from .models import Account
+import jwt
+import os
+from dotenv import load_dotenv
+import datetime
+from datetime import timedelta
 
+load_dotenv()
+jwt_secret_key = os.getenv('JWT_SECRET_KEY')
+
+# Login status check decorator
+def check_login(callback):
+    def wrapper(request):
+        # token in session
+        if 'token' in request.session:
+            try:
+                user_token = request.session['token']
+                decode_token = jwt.decode(
+                user_token, jwt_secret_key, algorithms="HS256")
+                return callback(request)
+            except:
+                del request.session['token']
+                if request.path != '/login':
+                    return redirect('/login')
+        # # token not in session
+        return redirect('/login')
+    return wrapper
+
+# Render pages
 def login_page(request):
+    if 'token' in request.session:
+        return redirect('/')
     return render(request, 'accounts/login.html')  
 
 def register_page(request):
+    if 'token' in request.session:
+        return redirect('/')
     return render(request, 'accounts/register.html')  
 
+# APIs
 def login(request):
     if request.method == 'PUT':
+        try:
+            # Parse the form
+            infos = json.loads(request.body)
+            email = infos['email']
+            password = infos['password']
 
-        account = Account()
+            # check if login infos are valid
+            account_set = Account.objects.filter(email=email, password=password).values('pk')
+
+            # valid
+            if account_set:
+                account_id = account_set[0]['pk']
+                payload = {
+                    "id": account_id,
+                    "exp": datetime.datetime.utcnow() + timedelta(days=7)
+                }
+                encoded_id = jwt.encode(payload, jwt_secret_key) # use encoded id as token
+                request.session['token'] = encoded_id
+                res = {
+                    'ok': True
+                }
+                return JsonResponse(res)
+
+            # invalid
+            if not account_set:
+                error = 'email or password is invalid'
+                res = {
+                    'error': True,
+                    'message': error
+                }
+                return JsonResponse(res, status=400)
+        except:
+            error = 'Internal Server Error'
+            res = {
+                'error':True,
+                'message': error
+            }
+            return JsonResponse(res, status=500)
         
-        print(request.body)
-
-
-        res = {
-            'ok': True
-        }
-
-        return JsonResponse(res)
 
 def register(request):
-
     if request.method == 'POST':
-
-        # try:
+        try:
             # Parse the form
             infos = json.loads(request.body)
             email = infos['email']
@@ -79,15 +137,15 @@ def register(request):
             account.save()
 
             res = {
-                'ok': False
+                'ok': True
             }
 
             return JsonResponse(res)
 
-        # except:
-        #     error = 'Internal Server Error'
-        #     res = {
-        #         'error':True,
-        #         'message': error
-        #     }
-        #     return JsonResponse(res, status=500)
+        except:
+            error = 'Internal Server Error'
+            res = {
+                'error':True,
+                'message': error
+            }
+            return JsonResponse(res, status=500)
