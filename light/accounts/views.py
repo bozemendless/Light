@@ -22,11 +22,11 @@ def check_login(callback):
                 user_token = request.session['token']
                 decode_token = jwt.decode(
                 user_token, jwt_secret_key, algorithms="HS256")
-                return callback(request)
             except:
                 del request.session['token']
                 if request.path != '/login':
                     return redirect('/login')
+            return callback(request)
         # # token not in session
         return redirect('/login')
     return wrapper
