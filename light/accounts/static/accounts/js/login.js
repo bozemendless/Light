@@ -96,8 +96,11 @@ function loginResult(data) {
     if (data.ok) {
         location.href = "/";
     }
-    if (data.message === "email or password is invalid") {
-        alert("帳號或密碼錯誤！");
-        location.reload();
+    if (data.message === "Email does NOT exist") {
+        alert("電子郵件不存在！");
     }
+    if (data.message === "Password is invalid") {
+        alert("密碼錯誤！");
+    }
+    location.reload();
 }

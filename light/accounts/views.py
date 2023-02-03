@@ -8,6 +8,7 @@ import os
 from dotenv import load_dotenv
 import datetime
 from datetime import timedelta
+from django.contrib.auth.hashers import make_password, check_password
 
 load_dotenv()
 jwt_secret_key = os.getenv('JWT_SECRET_KEY')
@@ -50,26 +51,41 @@ def login(request):
             email = infos['email']
             password = infos['password']
 
-            # check if login infos are valid
-            account_set = Account.objects.filter(email=email, password=password).values('pk')
+            # check if login infos are valid: 
+                # if account exists, return a queryset of pk(id) and password.
+                # if not exist, return an empty queryset.
+            account_set = Account.objects.filter(email=email).values('pk', 'password')
 
-            # valid
+            # account exists
             if account_set:
                 account_id = account_set[0]['pk']
-                payload = {
-                    "id": account_id,
-                    "exp": datetime.datetime.utcnow() + timedelta(days=7)
-                }
-                encoded_id = jwt.encode(payload, jwt_secret_key) # use encoded id as token
-                request.session['token'] = encoded_id
-                res = {
-                    'ok': True
-                }
-                return JsonResponse(res)
+                encoded_password = account_set[0]['password']
 
-            # invalid
+                # password is valid
+                if check_password(password,encoded_password):
+                    payload = {
+                        "id": account_id,
+                        "exp": datetime.datetime.utcnow() + timedelta(days=7)
+                    }
+                    encoded_id = jwt.encode(payload, jwt_secret_key) # use encoded id as token
+                    request.session['token'] = encoded_id
+                    res = {
+                        'ok': True
+                    }
+                    return JsonResponse(res)
+
+                # password is invalid
+                if not check_password(password,encoded_password):
+                    error = 'Password is invalid'
+                    res = {
+                        'error': True, 
+                        'message': error
+                    }
+                    return JsonResponse(res, status=400)
+
+            # account not exist
             if not account_set:
-                error = 'email or password is invalid'
+                error = 'Email does NOT exist'
                 res = {
                     'error': True,
                     'message': error
@@ -130,9 +146,9 @@ def register(request):
             # New account register
             account = Account()
 
-            account.email = infos['email']
-            account.username = infos['username']
-            account.password = infos['password']
+            account.email = email
+            account.username = username
+            account.password = make_password(password) # PBKDF2
 
             account.save()
 

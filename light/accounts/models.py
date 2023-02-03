@@ -14,7 +14,7 @@ class Account(models.Model):
         db_index=True,
         )
     password = models.CharField(
-        max_length=72,
+        max_length=88,
         db_index=True,
         )
     create_time = models.DateTimeField(default=timezone.now)
