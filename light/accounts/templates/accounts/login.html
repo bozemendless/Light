@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'accounts/css/accounts.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static '/light/favicon.ico' %}" />
+    <title>Light | 歡迎回來！</title>
+</head>
+<body>
+    <div class="container">
+        <div class="login-box">
+            <div class="header">
+                <h1>歡迎回來！</h1>
+                <div class="text">我們很高興又見到您了！</div>
+            </div>
+            <div class="main-login-container">
+                <form action="">
+                    {% csrf_token %}
+                    <div class="email">
+                        <label for="">電子郵件</label>
+                        <span for="" class="input-message required-message">*</span>
+                        <input type="email" id="email" autocomplete="off" required />
+                    </div>
+                    <div class="password">
+                        <label for="">密碼</label>
+                        <span for="" class="input-message required-message">*</span>
+                        <input type="password" id="password" autocomplete="off" required />
+                    </div>
+                    <div class="forget-password">
+                        <a class="forget-password-button link" href="#">忘記您的密碼？</a>
+                    </div>
+                    <input type="submit" class="pointer" id="submit" value="提交" />
+                    <div class="no-account">
+                        <span class="text">需要一個帳號？</span>
+                        <a class="signup-button link" href="/register">註冊</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'accounts/js/login.js' %}"></script>
+</body>
+</html>

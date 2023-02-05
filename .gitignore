@@ -1,0 +1,6 @@
+.env
+note.md
+__pycache__/
+venv/
+migrations/
+.vscode/

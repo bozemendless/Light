@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'accounts/css/accounts.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static '/light/favicon.ico' %}" />
+    <title>Light | 建立新帳號</title>
+</head>
+<body>
+    <div class="container">
+        <div class="register-box">
+            <div class="header">
+                <h1>建立新帳號</h1>
+            </div>
+            <div class="main-register-container">
+                <form action="">
+                    {% csrf_token %}
+                    <div class="email">
+                        <label for="">電子郵件</label>
+                        <span for="" class="input-message required-message">*</span>
+                        <input type="email" id="email" autocomplete="off" maxlength="64" required />
+                    </div>
+                    <div class="username">
+                        <label for="">使用者名稱</label>
+                        <span for="" class="input-message required-message">*</span>
+                        <input type="username" id="username" autocomplete="off" maxlength="32" required />
+                    </div>
+                    <div class="password">
+                        <label for="">密碼</label>
+                        <span for="" class="input-message required-message">*</span>
+                        <input type="password" id="password" autocomplete="off" maxlenth="72" required />
+                    </div>
+                    <input type="submit" class="pointer" id="submit" value="繼續" />
+                    <div class="have-owned-account">
+                        <a class="have-owned-account-button link" href="/login">已經有一個帳號？</a>
+                    </div>
+                    <div class="agree">
+                        註冊即代表同意 Light 的 <span class="link">服務條款</span> 及 <span class="link">隱私權政策</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'accounts/js/register.js' %}"></script>
+</body>
+</html>
