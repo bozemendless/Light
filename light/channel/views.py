@@ -1,8 +1,6 @@
 from django.shortcuts import render
-from datetime import datetime
+from accounts.views import check_login
 
-# Create your views here.
+@check_login
 def channel(request):
-    return render(request, 'channel/channel.html',{
-        'current_time': str(datetime.now()),
-    })
+    return render(request, 'channel/channel.html')
