@@ -9,6 +9,7 @@ urlpatterns = [
     # path('channel/', include('channel.urls')),
     path('', include('accounts.urls')),
     path('', include('channel.urls')),
+    path('', include('chats.urls')),
     path('admin', admin.site.urls),
 ]
 
