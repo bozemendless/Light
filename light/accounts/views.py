@@ -165,3 +165,22 @@ def register(request):
                 'message': error
             }
             return JsonResponse(res, status=500)
+
+def get_account_data(request):
+    # token in session
+    if 'token' in request.session:
+        try:
+            user_token = request.session['token']
+            decode_token = jwt.decode(
+            user_token, jwt_secret_key, algorithms="HS256")
+            user_id = (decode_token['id'])
+            res = {
+                'id': user_id
+            }
+            return JsonResponse(res)
+        except:
+            del request.session['token']
+            if request.path != '/login':
+                return redirect('/login')
+    # # token not in session
+    return redirect('/login')
