@@ -1,14 +1,227 @@
-let is_socket_connect = false;
+let isSocketConnect = false;
+let peer;
 let userId;
+let username;
+let peerId;
+const channelMap = {};
+let currentInChanneL;
+let clickedChannel;
+const settingUnmuteSvg = document.querySelector("#setting-unmute-svg");
+const settingMuteSvg = document.querySelector("#setting-mute-svg");
+let localStream = null;
+
+// Channel label views
 const messageList = document.querySelector("#message-list");
+let channelActive = document.querySelector(".channel-active");
+const chatPage = document.querySelector(".chat");
+const videoPage = document.querySelector(".video");
+const onePeopleVideo = document.querySelector(".one-people-video");
 
-// Get user infos
-getUserData();
+function switchChannel() {
+    if (channelActive.id === "general-chat-channel") {
+        chatPage.style.display = "flex";
+        videoPage.style.display = "none";
+    }
 
-// Get chat logs
-getChatLogs().then((chatLogs) => {
-    // Show chat logs
-    createChatLogs(chatLogs);
+    if (channelActive.id === "general-video-channel") {
+        videoPage.style.display = "block";
+        chatPage.style.display = "none";
+    }
+}
+
+const channelList = document.querySelector(".channel-list");
+const channelNameLabel = document.querySelectorAll(".channel-name-label");
+channelList.addEventListener("click", (event) => {
+    if (event.target.classList.contains("channel-active")) {
+        return;
+    }
+    if (event.target.classList.contains("channel-name-label")) {
+        channelNameLabel.forEach((element) => {
+            element.classList.toggle("channel-active");
+        });
+        channelActive = document.querySelector(".channel-active");
+        switchChannel();
+    }
+});
+
+function init() {
+    switchChannel(); // default is general text channel
+
+    // Get user infos
+    getUserData();
+
+    // Get chat logs
+    getChatLogs().then((chatLogs) => {
+        // Show chat logs
+        createChatLogs(chatLogs);
+    });
+
+    // Create My Peer Object
+    peer = createMyPeer();
+
+    // Default media toggle
+    settingMuteSvg.style.display = "none";
+}
+
+function createMyPeer() {
+    // Get my peerId
+    const peer = new Peer({
+        host: "0.peerjs.com",
+        port: 443,
+        path: "/",
+        pingInterval: 5000,
+    });
+
+    peer.on("open", function (id) {
+        peerId = id;
+    });
+
+    return peer;
+}
+
+init();
+
+// Join Voice Channel
+function joinVoiceChannel() {
+    // Change my already in Channel Name
+    currentInChanneL = "general-video-channel";
+
+    // Send my peerId, (Light)userId, (Light)username to existing Members(ask for connecting)
+    const sendData = {
+        action: "peer",
+        peerId: peerId,
+        id: userId,
+        username: username,
+    };
+    webSocket.send(JSON.stringify(sendData));
+
+    // Listen on WebSocket message
+    webSocket.addEventListener("message", (event) => {
+        const parsedData = JSON.parse(event.data);
+        if (parsedData.type === "sdp") {
+            const action = parsedData["data"]["action"];
+
+            // be asked for connecting
+            if (action === "peer") {
+                const newPeerId = parsedData["data"]["peer_id"];
+                const peerUsername = parsedData["data"]["peer_username"];
+                const userId = parsedData["data"]["user_id"];
+                const peerChannelName = parsedData["data"]["peer_channel_name"];
+                if (peerId === newPeerId) {
+                    // do nothing with myself join message(ask for connecting)
+                    return;
+                }
+                // Existing members track the new member
+                channelMap[`${peerChannelName}`] = {
+                    peerUsername: peerUsername,
+                    peerId: newPeerId,
+                    userId: userId,
+                };
+                if (Object.keys(channelMap).length !== 0) {
+                    onePeopleVideo.style.display = "none";
+                }
+                // answer to new peer
+                const sendData = {
+                    action: "answer",
+                    userId: userId,
+                    peerId: peerId,
+                    username: username,
+                    peerChannelName: peerChannelName,
+                };
+                webSocket.send(JSON.stringify(sendData));
+
+                // *peers existing in room already * Connect to new peer
+                const call = peer.call(newPeerId, localStream);
+                const remoteVideo = createRemoteVideo(peerUsername);
+                call.on("stream", (stream) => {
+                    remoteVideo.srcObject = stream;
+                });
+                // });
+                // conn.on("close", () => {
+                //     console.log("我們的好朋友", conn.label, "離開了");
+                //     const videoId = `#${conn.label}-video`;
+                //     const closeVideo = document.querySelector(videoId);
+                //     removeVideo(closeVideo);
+                // });
+            }
+
+            if (action === "answer") {
+                const existingPeerId = parsedData["data"]["peer_id"];
+                const peerUsername = parsedData["data"]["peer_username"];
+                const userId = parsedData["data"]["user_id"];
+                const peerChannelName =
+                    parsedData["data"]["answer_channel_name"];
+                peerUsernameInRemoteVideo = peerUsername;
+                channelMap[`${peerChannelName}`] = {
+                    peerUsername: peerUsername,
+                    peerId: existingPeerId,
+                    userId: userId,
+                };
+                if (Object.keys(channelMap).length !== 0) {
+                    onePeopleVideo.style.display = "none";
+                }
+            }
+
+            if (action === "leave") {
+                const peerChannelName = parsedData["data"]["peer_channel_name"];
+                if (!channelMap.hasOwnProperty(peerChannelName)) {
+                    return;
+                }
+                const leaveUsername = channelMap[peerChannelName].peerUsername;
+                const leaveUserVideo = document.querySelector(
+                    `#${leaveUsername}-video`
+                );
+                if (leaveUserVideo) {
+                    removeVideo(leaveUserVideo);
+                }
+
+                delete channelMap[`${peerChannelName}`];
+                if (Object.keys(channelMap).length === 0) {
+                    onePeopleVideo.style.display = "block";
+                }
+            }
+        }
+    });
+
+    // *new-peer just joining the room * Listen to existing members connections
+    let peerUsernameInRemoteVideo;
+    let remoteVideo;
+    const localStream = createLocalStream();
+    peer.on("call", (call) => {
+        console.log("on call!!!!!!!!!!!!!!!!!1");
+        call.answer(localStream);
+        remoteVideo = createRemoteVideo(peerUsernameInRemoteVideo);
+
+        call.on("stream", (stream) => {
+            remoteVideo.srcObject = stream;
+        });
+        call.on("error", (e) => {
+            console.log(e);
+        });
+        call.on("close", () => {
+            console.log("dc closed");
+        });
+    });
+    peer.on("close", () => {
+        console.log("peer on closed!!!!!!!");
+    });
+    peer.on("disconnected", () => {
+        console.log("peer on disconnected");
+    });
+}
+const generalVideoChannel = document.querySelector("#general-video-channel");
+generalVideoChannel.addEventListener("click", () => {
+    if (isSocketConnect === true) {
+        clickedChannel = "general-video-channel";
+
+        // been joined channel and the current channel cannot be the same
+        if (currentInChanneL === clickedChannel) {
+            console.log("already in this channel");
+        }
+        if (currentInChanneL !== clickedChannel) {
+            joinVoiceChannel();
+        }
+    }
 });
 
 // Functions
@@ -18,8 +231,15 @@ async function getUserData() {
     const response = await fetch(getUserDataUrl);
     const data = await response.json();
     userId = data.id;
+    username = data.username;
+
+    // Show username in setting zone
+    const usernameContainer = document.querySelector(".username-container");
+    usernameContainer.textContent = username;
 }
 
+// Chat Logs
+// Get history chat logs when user logs in
 async function getChatLogs() {
     const getChatLogsUrl = "/api/chat_logs";
     const response = await fetch(getChatLogsUrl);
@@ -27,11 +247,11 @@ async function getChatLogs() {
     return data.data;
 }
 
+// Create and show history logs
 function createChatLogs(data) {
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    const options = { hour: "2-digit", minute: "2-digit" };
 
     data.forEach((chatLog) => {
         const messageDiv = document.createElement("div");
@@ -61,32 +281,46 @@ function createChatLogs(data) {
         messageUser.textContent = chatLog["username"];
         messageContent.textContent = chatLog["message"];
 
-        // Img
+        // Avatar
         messageUserAvatar.src = url;
 
         // Display time
         const chatTime = new Date(chatLog["time"]);
         let displayTime;
+        let hour = chatTime.getHours();
+        let minutes = chatTime.getMinutes();
 
-        if (chatTime.toDateString() === today.toDateString()) {
-            displayTime = `今天 ${chatTime.getHours()}:${chatTime.getMinutes()}`;
-        } else if (chatTime.toDateString() === yesterday.toDateString()) {
-            displayTime = `昨天 ${chatTime.getHours()}:${chatTime.getMinutes()}`;
-        } else {
-            displayTime = `${chatTime.getFullYear()}-${
-                chatTime.getMonth() + 1
-            }-${chatTime.getDate()} ${chatTime.getHours()}:${chatTime.getMinutes()}`;
+        if (hour < 10) {
+            hour = "0" + hour;
+        }
+        if (minutes < 10) {
+            minutes = "0" + minutes;
         }
 
+        if (chatTime.toDateString() === today.toDateString()) {
+            displayTime = `今天 ${hour}:${minutes}`;
+        } else if (chatTime.toDateString() === yesterday.toDateString()) {
+            displayTime = `昨天 ${hour}:${minutes}`;
+        } else {
+            let month = chatTime.getMonth() + 1;
+            let date = chatTime.getDate();
+            if (month < 10) {
+                month = "0" + month;
+            }
+            if (date < 10) {
+                date = "0" + date;
+            }
+            displayTime = `${chatTime.getFullYear()}/${month}/${date} ${hour}:${minutes}`;
+        }
         messageTime.textContent = displayTime;
     });
 }
 
+// WebSocket
 const webSocket = webSocketConnect();
 
-// WebSocket
-
 function webSocketConnect() {
+    // Connect to server
     let wsStart = "ws://";
     if (window.location.protocol === "https:") {
         wsStart = "wss://";
@@ -95,12 +329,10 @@ function webSocketConnect() {
     const webSocket = new WebSocket(endpoint);
     webSocket.addEventListener("open", (event) => {
         console.log("webSocket connected");
-        is_socket_connect = true;
-
-        // sendSignal("new peer", {});
+        isSocketConnect = true;
     });
 
-    // webSocket.addEventListener("message", webSocketOnMessage);
+    // Listen to chat message
     webSocket.addEventListener("message", (event) => {
         const parsedData = JSON.parse(event.data);
         if (parsedData.type === "message") {
@@ -109,11 +341,13 @@ function webSocketConnect() {
         }
     });
 
+    // Listen to close event
     webSocket.addEventListener("close", (event) => {
-        is_socket_connect = false;
+        isSocketConnect = false;
         console.log("WebSocket close", "connection closed!", event);
     });
 
+    // Listen to error event
     webSocket.addEventListener("error", (event) => {
         console.log("WebSocket error", "error!", event);
     });
@@ -121,14 +355,16 @@ function webSocketConnect() {
     return webSocket;
 }
 
+// Send Chat Message via WebSocket
 const messageInput = document.querySelector("#message-input");
 messageInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" && is_socket_connect) {
+    if (event.key === "Enter" && isSocketConnect) {
         const messageValue = messageInput.value;
         send_message(messageValue);
         messageInput.value = "";
     }
 });
+
 function send_message(message) {
     if (message !== "") {
         const sendData = {
@@ -140,269 +376,227 @@ function send_message(message) {
     }
 }
 
-// let username;
-// const btnJoin = document.querySelector("#btn-join");
-// const mapPeers = {};
-// let configuration;
-
-// const localVideo = document.querySelector("#local-video");
-// const btnToggleAudio = document.querySelector("#btn-toggle-audio");
-// const btnToggleVideo = document.querySelector("#btn-toggle-video");
 // Stream
-// function webSocketOnMessage(event) {
-// const parsedData = JSON.parse(event.data);
-// const peerUsername = parsedData["peer"];
-// const action = parsedData["action"];
-// if (username === peerUsername) {
-//     return;
-// }
-// const receiver_channel_name =
-//     parsedData["message"]["receiver_channel_name"];
-// if (action === "new peer") {
-//     createOfferer(peerUsername, receiver_channel_name);
-//     return;
-// }
-// if (action === "new-offer") {
-//     const offer = parsedData["message"]["sdp"];
-//     createAnswerer(offer, peerUsername, receiver_channel_name);
-//     return;
-// }
-// if (action === "new-answer") {
-//     const answer = parsedData["message"]["sdp"];
-//     const peer = mapPeers[peerUsername][0];
-//     peer.setRemoteDescription(answer);
-//     return;
-// }
-// }
+// Local Video
+function createLocalStream() {
+    localStream = new MediaStream();
+    const localVideo = document.querySelector("#local-video");
+    const cameraBtn = document.querySelector("#camera-btn");
+    const audioBtn = document.querySelector("#audio-btn");
+    const leaveBtn = document.querySelector("#leave-btn");
+    const audioOnSvg = document.querySelector("#audio-on-svg");
+    const audioOffSvg = document.querySelector("#audio-off-svg");
 
-// btnJoin.addEventListener("click", () => {
-//     username = usernameInput.value;
+    let videoTracks;
+    let audioTracks;
 
-//     if (username == "") {
-//         return;
-//     }
+    cameraBtn.classList.add("camera-active");
+    audioBtn.classList.add("audio-active");
+    audioOffSvg.style.display = "none";
 
-//     usernameInput.value = "";
-//     usernameInput.disable = true;
-//     usernameInput.style.visibility = "hidden";
+    navigator.mediaDevices
+        .getUserMedia({
+            video: true,
+            audio: true,
+        })
+        .then(async (localMedia) => {
+            audioTracks = localMedia.getAudioTracks();
+            videoTracks = localMedia.getVideoTracks();
+            localStream.addTrack(audioTracks[0]);
+            localStream.addTrack(videoTracks[0]);
+            audioTracks[0].enabled = true;
+            videoTracks[0].enabled = true;
+        });
 
-//     // btnJoin.style.visibility = "hidden";
+    function cameraBtnClick() {
+        videoTracks[0].enabled = !videoTracks[0].enabled;
 
-//     localVideo.style.display = "block";
-//     btnToggleAudio.style.display = "block";
-//     btnToggleVideo.style.display = "block";
+        if (videoTracks[0].enabled) {
+            localVideo.style.display = "block";
+            cameraBtn.classList.add("camera-active");
+        } else {
+            localVideo.style.display = "none";
+            cameraBtn.classList.remove("camera-active");
+        }
+    }
+    cameraBtn.addEventListener("click", cameraBtnClick);
 
-//     const labelUsername = document.querySelector("#label-username");
-//     labelUsername.textContent = username;
-// });
+    audioBtn.addEventListener("click", (e) => {
+        audioTracks[0].enabled = !audioTracks[0].enabled;
 
-// Get stream
-// let localStream = new MediaStream();
+        if (audioTracks[0].enabled) {
+            audioBtn.classList.add("audio-active");
+            audioOnSvg.style.display = "inline";
+            audioOffSvg.style.display = "none";
+            settingUnmuteSvg.style.display = "inline";
+            settingMuteSvg.style.display = "none";
+        } else {
+            audioBtn.classList.remove("audio-active");
+            audioOnSvg.style.display = "none";
+            audioOffSvg.style.display = "inline";
+            settingUnmuteSvg.style.display = "none";
+            settingMuteSvg.style.display = "inline";
+        }
+    });
 
-// const constraints = {
-//     video: true,
-//     audio: true,
+    leaveBtn.addEventListener("click", (event) => {
+        peer.destroy();
+        // const sendData = {
+        //     action: "leave",
+        // };
+        // webSocket.send(JSON.stringify(sendData));
+
+        // // Stop local stream
+        // if (localStream) {
+        //     localStream.getTracks().forEach((track) => {
+        //         track.stop();
+        //     });
+        //     localStream = null;
+        // }
+
+        // // Delete remote video
+        // Object.keys(channelMap).forEach((key) => {
+        //     const remoteVideo = document.querySelector(
+        //         `#${channelMap[key]["peerUsername"]}-video`
+        //     );
+        //     removeVideo(remoteVideo);
+        //     delete channelMap[key];
+        // });
+        // if (Object.keys(channelMap).length === 0) {
+        //     onePeopleVideo.style.display = "block";
+        // }
+
+        location.reload();
+    });
+
+    localVideo.srcObject = localStream;
+    localVideo.muted = true;
+
+    // Name label
+    const localVideoWrapper = document.querySelector(".local-video-wrapper");
+    const channelUsernameLabel = document.createElement("div");
+    channelUsernameLabel.className = "channel-username-label";
+    localVideoWrapper.appendChild(channelUsernameLabel);
+    channelUsernameLabel.textContent = username;
+
+    return localStream;
+}
+
+// RemoTe Video
+function createRemoteVideo(peerUsername) {
+    const videos = document.querySelector(".videos");
+    const videoWrapper = document.createElement("div");
+    const remoteVideo = document.createElement("video");
+
+    videos.appendChild(videoWrapper);
+    videoWrapper.appendChild(remoteVideo);
+
+    videoWrapper.className = "video-wrapper";
+    remoteVideo.id = `${peerUsername}-video`;
+
+    remoteVideo.autoplay = true;
+    remoteVideo.playsInline = true;
+
+    // Name label
+    const channelPeerNameLabel = document.createElement("div");
+    channelPeerNameLabel.className = "channel-username-label";
+    videoWrapper.appendChild(channelPeerNameLabel);
+    channelPeerNameLabel.textContent = peerUsername;
+
+    return remoteVideo;
+}
+
+// RemoVe Video
+function removeVideo(video) {
+    const videoWrapper = video.parentNode;
+    if (videoWrapper) {
+        videoWrapper.parentNode.removeChild(videoWrapper);
+    }
+    return;
+}
+
+/*
+
+
+
+
+
+
+
+
+*/
+// // let peer;
+// const configuration = {
+//     iceServers: [
+//         {
+//             urls: [
+//                 "stun:stun.l.google.com:19302",
+//                 "stun:stun1.l.google.com:19302",
+//                 // "stun:stun2.l.google.com:19302",
+//             ],
+//         },
+//     ],
 // };
 
-// const userMedia = navigator.mediaDevices
-//     .getUserMedia(constraints)
-//     .then((stream) => {
-//         localStream = stream;
-//         localVideo.srcObject = localStream;
-//         localVideo.muted = true;
+// // create offer
+// function createOffer(peerUsername, receiverChannelName) {
+//     const peer = new RTCPeerConnection(configuration);
 
-//         const audioTracks = stream.getAudioTracks();
-//         const videoTracks = stream.getVideoTracks();
+//     // add local tracks
+//     addLocalTracks(peer);
 
-//         audioTracks[0].enabled = true;
-//         videoTracks[0].enabled = true;
-
-//         btnToggleAudio.addEventListener("click", () => {
-//             audioTracks[0].enabled = !audioTracks[0].enabled;
-
-//             if (audioTracks[0].enabled) {
-//                 btnToggleAudio.textContent = "🔈 Mute";
-
-//                 return;
-//             }
-
-//             btnToggleAudio.textContent = "🔈 Unmute";
-//         });
-
-//         btnToggleVideo.addEventListener("click", () => {
-//             videoTracks[0].enabled = !videoTracks[0].enabled;
-
-//             if (videoTracks[0].enabled) {
-//                 btnToggleVideo.textContent = "📹 Off";
-
-//                 return;
-//             }
-
-//             btnToggleVideo.textContent = "📹 On";
-//         });
-//     })
-//     .catch((error) => {
-//         console.log("error accessing media devices", error);
+//     const dc = peer.createDataChannel("channel");
+//     dc.addEventListener("open", () => {
+//         console.log("create offer open dc");
 //     });
 
-// function sendSignal(action, message) {
-//     // our username is same for now so don't need to have username in arguments
+//     const remoteVideo = createRemoteVideo(peerUsername);
+//     setOnTrack(peer, remoteVideo);
 
-//     const jsonStr = JSON.stringify({
-//         peer: username,
-//         action: action,
-//         message: message,
+//     mapPeers[peerUsername] = [peer, dc];
+
+//     peer.addEventListener("iceconnectionstatechange", () => {
+//         const iceConnectionState = peer.iceConnectionState;
+//         console.log(111, iceConnectionState);
+
+//         if (
+//             iceConnectionState === "failed" ||
+//             iceConnectionState === "disconnected" ||
+//             iceConnectionState === "closed"
+//         ) {
+//             delete mapPeers[peerUsername];
+
+//             if (iceConnectionState !== "closed") {
+//                 peer.close();
+//             }
+
+//             removeVideo(remoteVideo);
+//         }
 //     });
 
-//     console.log("sendSignal");
+//     peer.addEventListener("icecandidate", (e) => {
+//         if (e.candidate) {
+//             console.log("new ice candidate");
 
-//     webSocket.send(jsonStr);
-// }
+//             return;
+//         }
 
-// // CreateOfferer
-// function createOfferer(peerUsername, receiver_channel_name) {
-//     fetch("/api/token")
-//         .then((res) => {
-//             return res.json();
-//         })
-//         .then((data) => {
-//             configuration = data;
-//         })
-//         .then(() => {
-//             console.log("create offer conf", configuration);
-//             const peer = new RTCPeerConnection(configuration); // same network
-
-//             addLocalTracks(peer);
-
-//             const dataChannel = peer.createDataChannel("channel");
-//             dataChannel.addEventListener("open", () => {
-//                 console.log("Offer dataChannel", "connection opened!");
-//             });
-
-//             dataChannel.addEventListener("message", dataChannelOnMessage);
-
-//             const remoteVideo = createVideo(peerUsername);
-//             setOnTrack(peer, remoteVideo);
-
-//             mapPeers[peerUsername] = [peer, dataChannel];
-
-//             peer.addEventListener("iceconnectionstatechange", () => {
-//                 const iceConnectionState = peer.iceConnectionState;
-
-//                 if (
-//                     iceConnectionState === "failed" ||
-//                     iceConnectionState === "disconnected" ||
-//                     iceConnectionState === "closed"
-//                 ) {
-//                     delete mapPeers[peerUsername];
-
-//                     if (iceConnectionState !== "closed") {
-//                         peer.close();
-//                     }
-
-//                     removeVideo(remoteVideo);
-//                 }
-//             });
-
-//             peer.addEventListener("icecandidate", (e) => {
-//                 if (e.candidate) {
-//                     console.log("offer new icecandidate");
-//                     dataChannel.send({ "new-ice-candidate": e.candidate });
-//                 }
-
-//                 sendSignal("new-offer", {
-//                     sdp: peer.localDescription,
-//                     receiver_channel_name: receiver_channel_name,
-//                 });
-//             });
-
-//             peer.createOffer()
-//                 .then((offer) => peer.setLocalDescription(offer))
-//                 .then(() => {
-//                     console.log("offer Local description set successfully");
-//                 });
+//         sendSignal("new-offer", username, {
+//             sdp: peer.localDescription,
+//             receiver_channel_name: receiverChannelName,
 //         });
-// }
-// // CreateAnswerer
-// function createAnswerer(offer, peerUsername, receiver_channel_name) {
-//     // const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
-//     fetch("/api/token")
-//         .then((res) => {
-//             return res.json();
-//         })
-//         .then((data) => {
-//             configuration = data;
+//     });
+
+//     peer.createOffer()
+//         .then((offer) => {
+//             peer.setLocalDescription(offer);
 //         })
 //         .then(() => {
-//             console.log("create ans conf", configuration);
-//             const peer = new RTCPeerConnection(configuration);
-
-//             addLocalTracks(peer);
-
-//             const remoteVideo = createVideo(peerUsername);
-//             setOnTrack(peer, remoteVideo);
-
-//             peer.addEventListener("datachannel", (e) => {
-//                 peer.dataChannel = e.channel;
-//                 peer.dataChannel.addEventListener("open", () => {
-//                     console.log("answer dataChannel", "connection opened!");
-//                 });
-//                 peer.dataChannel.addEventListener(
-//                     "message",
-//                     dataChannelOnMessage
-//                 );
-
-//                 mapPeers[peerUsername] = [peer, peer.dataChannel];
-//             });
-
-//             peer.addEventListener("iceconnectionstatechange", () => {
-//                 const iceConnectionState = peer.iceConnectionState;
-//                 console.log(iceConnectionState);
-
-//                 if (
-//                     iceConnectionState === "failed" ||
-//                     iceConnectionState === "disconnected" ||
-//                     iceConnectionState === "closed"
-//                 ) {
-//                     delete mapPeers[peerUsername];
-
-//                     if (iceConnectionState !== "closed") {
-//                         peer.close();
-//                     }
-
-//                     removeVideo(remoteVideo);
-//                 }
-//             });
-
-//             peer.addEventListener("icecandidate", (event) => {
-//                 if (event.candidate) {
-//                     console.log("ans new icecandidate");
-
-//                     return;
-//                 }
-
-//                 sendSignal("new-answer", {
-//                     sdp: peer.localDescription,
-//                     receiver_channel_name: receiver_channel_name,
-//                 });
-//             });
-
-//             peer.setRemoteDescription(offer)
-//                 .then(() => {
-//                     console.log(
-//                         `ans Remote description set successfully for ${peerUsername}`
-//                     );
-
-//                     return peer.createAnswer();
-//                 })
-//                 .then((answer) => {
-//                     console.log("answer created");
-
-//                     peer.setLocalDescription(answer);
-//                 });
+//             console.log("setLocalDescription set successfully");
 //         });
 // }
 
+// // Add Local Tracks
 // function addLocalTracks(peer) {
 //     localStream.getTracks().forEach((track) => {
 //         peer.addTrack(track, localStream);
@@ -411,43 +605,7 @@ function send_message(message) {
 //     return;
 // }
 
-// const messageList = document.querySelector("#message-list");
-// function dataChannelOnMessage(event) {
-//     const message = event.data;
-//     const list = document.createElement("li");
-//     list.textContent = message;
-//     messageList.appendChild(list);
-//     try {
-//         peer.addIceCandidate(message.iceCandidate);
-//     } catch (e) {
-//         console.error("Error adding received ice candidate", e);
-//     }
-// }
-
-// function createVideo(peerUsername) {
-//     const videosContainer = document.querySelector(".videos-container");
-
-//     const videoContainer = document.createElement("div");
-//     videoContainer.className = "video-container";
-//     // const videoContainer = document.querySelector("#video-container");
-//     const remoteVideo = document.createElement("video");
-
-//     remoteVideo.id = `${peerUsername}-video`;
-//     remoteVideo.autoplay = true;
-//     remoteVideo.playsInline = true;
-//     remoteVideo.className = "video";
-
-//     const videoWrapper = document.createElement("div");
-//     videoWrapper.className = "video-wrapper";
-
-//     videosContainer.appendChild(videoContainer);
-//     videoContainer.appendChild(videoWrapper);
-//     videoWrapper.appendChild(remoteVideo);
-//     videoContainer.appendChild(videoWrapper);
-
-//     return remoteVideo;
-// }
-
+// // Set On Track
 // function setOnTrack(peer, remoteVideo) {
 //     const remoteStream = new MediaStream();
 
@@ -458,8 +616,77 @@ function send_message(message) {
 //     });
 // }
 
-// function removeVideo(video) {
-//     const videoWrapper = video.parentNode;
+// // Create Answer
+// function createAnswer(sdp, peerUsername, receiverChannelName) {
+//     const peer = new RTCPeerConnection(configuration);
 
-//     videoWrapper.parentNode.removeChild(videoWrapper);
+//     // add local tracks
+//     addLocalTracks(peer);
+
+//     const remoteVideo = createRemoteVideo(peerUsername);
+//     setOnTrack(peer, remoteVideo);
+
+//     peer.addEventListener("datachannel", (e) => {
+//         peer.dc = e.channel;
+//         peer.dc.addEventListener("open", () => {
+//             console.log("ans open dc");
+//         });
+
+//         mapPeers[peerUsername] = [peer, peer.dc];
+//     });
+
+//     peer.addEventListener("iceconnectionstatechange", () => {
+//         const iceConnectionState = peer.iceConnectionState;
+//         console.log(iceConnectionState);
+
+//         if (
+//             iceConnectionState === "failed" ||
+//             iceConnectionState === "disconnected" ||
+//             iceConnectionState === "closed"
+//         ) {
+//             delete mapPeers[peerUsername];
+
+//             if (iceConnectionState !== "closed") {
+//                 peer.close();
+//             }
+//             removeVideo(remoteVideo);
+//         }
+//     });
+
+//     peer.addEventListener("icecandidate", (event) => {
+//         if (event.candidate) {
+//             console.log("new ice candidate");
+
+//             return;
+//         }
+//     });
+
+//     peer.setRemoteDescription(sdp)
+//         .then(() => {
+//             console.log(
+//                 `remote description set successfully for ${peerUsername}`
+//             );
+
+//             return peer.createAnswer();
+//         })
+//         .then((a) => {
+//             console.log("ans created");
+
+//             peer.setLocalDescription(a);
+//         })
+//         .then(() => {
+//             sendSignal("new-answer", username, {
+//                 sdp: peer.localDescription,
+//                 receiver_channel_name: receiverChannelName,
+//             });
+//         });
+// }
+
+// function sendSignal(action, username, message) {
+//     const sendData = {
+//         action: action,
+//         username: username,
+//         message: message,
+//     };
+//     webSocket.send(JSON.stringify(sendData));
 // }

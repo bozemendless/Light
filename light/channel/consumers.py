@@ -1,6 +1,7 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from chats.views import save_chat_logs
+
 class ChannelConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
@@ -13,6 +14,17 @@ class ChannelConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
+        data = {
+            'action': 'leave',
+            'peer_channel_name': self.channel_name
+        }
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'send_sdp',
+                'data': data
+            }
+        )
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
@@ -25,6 +37,8 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             action = receive_data['action']
         except Exception as e:
             print(e)
+
+        # Chat message
         if action == 'message':
             try:
                 message = receive_data['message']
@@ -41,10 +55,76 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             except Exception as e:
                 print(e)
 
-    async def send_sdp(self, event):
-        receive_dict = event['receive_dict']
+        # # Video 
+        # New member joining
+        if action == 'peer':
 
-        await self.send(text_data = json.dumps(receive_dict))
+            peer_id = receive_data['peerId']
+            user_id = receive_data['id']
+            peer_username = receive_data['username']
+            peer_channel_name = self.channel_name
+
+            data = {
+                'action': 'peer',
+                'user_id': user_id,
+                'peer_id': peer_id,
+                'peer_username': peer_username,
+                'peer_channel_name': peer_channel_name,
+            }
+
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'send_sdp',
+                    'data': data
+                }
+            )
+
+        # answer to new Peer
+        if action == 'answer':
+
+            peer_id = receive_data['peerId']
+            user_id = receive_data['userId']
+            peer_username = receive_data['username']
+            new_peer_channel_name = receive_data['peerChannelName']
+
+            data = {
+                'action': 'answer',
+                'user_id': user_id,
+                'peer_id': peer_id,
+                'peer_username': peer_username,
+                'answer_channel_name': self.channel_name
+            }
+
+            await self.channel_layer.send(
+                new_peer_channel_name,
+                {
+                    'type': 'send_sdp',
+                    'data': data,
+                }
+            )
+
+        # Leave the channel
+        if action == 'leave':
+            data = {
+                'action': 'leave',
+                'peer_channel_name': self.channel_name
+            }
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'send_sdp',
+                    'data': data
+                }
+            )
+
+    async def send_sdp(self, event):
+        data = event['data']
+
+        await self.send(text_data = json.dumps({
+            'type': 'sdp',
+            'data': data,
+        }))
 
     async def send_message(self, event):
         data = event['data']
@@ -53,33 +133,4 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             'type': 'message',
             'data': data,
         }))
-
-
-        
-
-        # if action == 'new-offer' or action == 'new-answer':
-        #     receiver_channel_name = receive_dict['message']['receiver_channel_name']
-
-        #     receive_dict['message']['receiver_channel_name'] = self.channel_name
-
-        #     await self.channel_layer.send(
-        #         receiver_channel_name,
-        #         {
-        #             'type': 'send_sdp',
-        #             'receive_dict': receive_dict
-        #         }
-        #     )
-
-        #     return 
-
-        # receive_dict['message']['receiver_channel_name'] = self.channel_name
-
-        # await self.channel_layer.group_send(
-        #     self.room_group_name,
-        #     {
-        #         'type': 'send_sdp',
-        #         'receive_dict': receive_dict
-        #     }
-        # )
-        
 

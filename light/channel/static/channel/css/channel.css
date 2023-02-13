@@ -2,6 +2,7 @@
 :root {
     background-color: #36393f;
     max-height: 100vh;
+    overflow-x: hidden;
 }
 
 /* Reset */
@@ -29,11 +30,16 @@
     outline: none;
     border: 0;
     user-select: none;
+    white-space: nowrap;
 }
 
 /* General */
-.pointer {
+.pointer, button {
     cursor: pointer;
+}
+
+#strikethrough, .strikethrough {
+    fill: #ed4245
 }
 
 /* ==================================== */
@@ -284,6 +290,13 @@ path {
 }
 
 /* Chat */
+.chat {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    display:none;
+}
+
 .messages-wrapper {
     height: 100%;
 }
@@ -340,37 +353,110 @@ path {
 
 
 /* Video */
-#username {
-    width: 120px;
-    height: 30px;
-    font-size: 10px;
-    margin: 10px;
-    padding: 5px;
-    color: #fff;
-    background-color: #40444b;
-}
-
-.videos-container {
+.video {
+    height: calc(100vh - 50px);
+    background-color: black;
     width: 100%;
-    display: flex;
-    flex-wrap: wrap;
+    display: none;
 }
 
-.local-video-wrapper {
+.videos-wrapper {
+    height: 100%;
     position: relative;
+}
+
+.videos {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: 100%;
 }
 
 .video-wrapper {
     width: 100%;
+    max-width: 50%;
+    margin: 8px;
+    aspect-ratio: 1.777794204612655/1;
+    border-radius: 8px;
+    background-color: #202225;
+    position: relative;
 }
 
-#local-video {
-    display: none;
+video {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    aspect-ratio: 1.777794204612655/1;
+    object-fit: cover;
+    /* display: none */
 }
 
-.video {
-    margin: 10px auto;
+video:hover {
+    outline: -webkit-focus-ring-color auto 0;
+}
+
+.channel-username-label {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    height: 32px;
+    background-color: #34383f;
     border-radius: 5px;
+    font-size: 16px;
+    color: #fff;
+    padding: 6px 12px;
+    text-align: center;
+    line-height: 20px;
+}
+
+.video-wrapper>.message-wrapper{
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+}
+
+.video-wrapper>.message-wrapper>.one-people-message {
+    font-size: 16px;
+    color: #FFF;
+}
+
+.voice-button-wrapper {
+    height: 56px;
+    width: 56px;
+    background-color: #2f3136;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 8px
+}
+
+.audio-button-wrapper {
+    background-color: #f2f3f5;
+}
+
+.audio-button-wrapper>button>div>svg>path {
+    fill: #060607;
+}
+
+.voice-button-wrapper:hover {
+    background-color: #202225;
+}
+
+.audio-button-wrapper:hover {
+    background-color: #f2f3f5;
+}
+
+.voice-button-wrapper>button {
+    background-color: inherit;
+
+}
+
+.leave-button-wrapper, .leave-button-wrapper:hover {
+    background-color: #ed4245;
 }
 
 .toggles {
@@ -381,16 +467,36 @@ path {
     width: 100%;
     display: flex;
     justify-content: center;
+    padding: 0 16px 16px;
+    height: 72px;
 }
 
-.toggle {
-    width: 50px;
-    height: 50px;
-    display: none;
-    font-size: 12px;
-    border-radius: 50%;
-    color: #292b30;
-    cursor: pointer;
+.camera-active {
+    background-color: #f2f3f5;
+}
+
+.camera-active:hover {
+    background-color: #f2f3f5 ;
+}
+
+.camera-active>button>div>svg>path {
+    fill: #060607;
+}
+
+.audio-active {
+    background-color: #2f3136;
+}
+
+.audio-active:hover {
+    background-color: #202225;
+}
+
+.audio-active>button>div>svg>path {
+    fill: #dcddde;
+}
+
+.leave-button-wrapper>button>div>svg>path {
+    fill: #fff;
 }
 
 #message-input {
