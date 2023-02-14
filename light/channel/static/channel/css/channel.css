@@ -499,6 +499,23 @@ video:hover {
     fill: #fff;
 }
 
+.button-forbidden {
+    background-color: #18191b;
+}
+
+.button-forbidden>button>div>svg>path {
+    fill: #808080;
+}
+
+.button-forbidden:hover {
+    background-color: #101113;
+    cursor: not-allowed;
+}
+
+.button-forbidden>button {
+    cursor: not-allowed;
+}
+
 #message-input {
     width: calc(100% - 30px);
     margin: auto;

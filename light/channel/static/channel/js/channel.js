@@ -9,6 +9,7 @@ let clickedChannel;
 const settingUnmuteSvg = document.querySelector("#setting-unmute-svg");
 const settingMuteSvg = document.querySelector("#setting-mute-svg");
 let localStream = null;
+const mediaConnections = [];
 
 // Channel label views
 const messageList = document.querySelector("#message-list");
@@ -35,7 +36,10 @@ channelList.addEventListener("click", (event) => {
     if (event.target.classList.contains("channel-active")) {
         return;
     }
-    if (event.target.classList.contains("channel-name-label")) {
+    if (
+        event.target.classList.contains("channel-name-label") &&
+        peerId != null
+    ) {
         channelNameLabel.forEach((element) => {
             element.classList.toggle("channel-active");
         });
@@ -85,17 +89,10 @@ init();
 function joinVoiceChannel() {
     // Change my already in Channel Name
     currentInChanneL = "general-video-channel";
+    const localStream = createLocalStream();
 
-    // Send my peerId, (Light)userId, (Light)username to existing Members(ask for connecting)
-    const sendData = {
-        action: "peer",
-        peerId: peerId,
-        id: userId,
-        username: username,
-    };
-    webSocket.send(JSON.stringify(sendData));
-
-    // Listen on WebSocket message
+    // Listen on WebSocket messages
+    let peerUsernameInRemoteVideo;
     webSocket.addEventListener("message", (event) => {
         const parsedData = JSON.parse(event.data);
         if (parsedData.type === "sdp") {
@@ -132,17 +129,12 @@ function joinVoiceChannel() {
 
                 // *peers existing in room already * Connect to new peer
                 const call = peer.call(newPeerId, localStream);
+                mediaConnections.push(call.peerConnection);
+                // console.log(call.peerConnection.getSenders()[0]);
                 const remoteVideo = createRemoteVideo(peerUsername);
                 call.on("stream", (stream) => {
                     remoteVideo.srcObject = stream;
                 });
-                // });
-                // conn.on("close", () => {
-                //     console.log("我們的好朋友", conn.label, "離開了");
-                //     const videoId = `#${conn.label}-video`;
-                //     const closeVideo = document.querySelector(videoId);
-                //     removeVideo(closeVideo);
-                // });
             }
 
             if (action === "answer") {
@@ -183,14 +175,26 @@ function joinVoiceChannel() {
         }
     });
 
-    // *new-peer just joining the room * Listen to existing members connections
-    let peerUsernameInRemoteVideo;
-    let remoteVideo;
-    const localStream = createLocalStream();
+    // *new-peer just joining the room *
+    // Send my peerId, (Light)userId, (Light)username to existing Members(ask for connecting)
+    const sendData = {
+        action: "peer",
+        peerId: peerId,
+        id: userId,
+        username: username,
+    };
+    webSocket.send(JSON.stringify(sendData));
+
+    // *new-peer just joining the room *
+    // Listen to existing members' connections (wait for connecting)
+
     peer.on("call", (call) => {
-        console.log("on call!!!!!!!!!!!!!!!!!1");
+        // console.log("on call!");
         call.answer(localStream);
-        remoteVideo = createRemoteVideo(peerUsernameInRemoteVideo);
+
+        mediaConnections.push(call.peerConnection);
+
+        const remoteVideo = createRemoteVideo(peerUsernameInRemoteVideo);
 
         call.on("stream", (stream) => {
             remoteVideo.srcObject = stream;
@@ -199,15 +203,16 @@ function joinVoiceChannel() {
             console.log(e);
         });
         call.on("close", () => {
-            console.log("dc closed");
+            console.log("media connection closed");
+            // mediaConnections.remove(call.peerConnection);
         });
     });
-    peer.on("close", () => {
-        console.log("peer on closed!!!!!!!");
-    });
-    peer.on("disconnected", () => {
-        console.log("peer on disconnected");
-    });
+    // peer.on("close", () => {
+    //     console.log("peer on closed!");
+    // });
+    // peer.on("disconnected", () => {
+    //     console.log("peer on disconnected");
+    // });
 }
 const generalVideoChannel = document.querySelector("#general-video-channel");
 generalVideoChannel.addEventListener("click", () => {
@@ -218,7 +223,7 @@ generalVideoChannel.addEventListener("click", () => {
         if (currentInChanneL === clickedChannel) {
             console.log("already in this channel");
         }
-        if (currentInChanneL !== clickedChannel) {
+        if (currentInChanneL !== clickedChannel && peerId != null) {
             joinVoiceChannel();
         }
     }
@@ -390,38 +395,114 @@ function createLocalStream() {
     let videoTracks;
     let audioTracks;
 
-    cameraBtn.classList.add("camera-active");
-    audioBtn.classList.add("audio-active");
-    audioOffSvg.style.display = "none";
+    let cameraExist = false;
+    let cameraToggle = false;
 
+    // Check if camera exists
+    navigator.mediaDevices
+        .enumerateDevices()
+        .then((devices) => {
+            devices.forEach((device) => {
+                if (device.kind === "videoinput") {
+                    console.log(device.label);
+                    cameraExist = true;
+                }
+            });
+        })
+        .then(() => {
+            if (!cameraExist) {
+                cameraBtn.classList.add("button-forbidden");
+            }
+        });
+
+    // Create fake video track
+    function createFakeVideoTrack() {
+        let canvas = document.createElement("canvas");
+        canvas.width = 640;
+        canvas.height = 480;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#757e8a";
+        ctx.fillRect(0, 0, 640, 480);
+        let stream = canvas.captureStream();
+        return stream.getVideoTracks()[0];
+    }
+
+    // Add fake video track
+    const fakeVideoTrack = createFakeVideoTrack();
+    localStream.addTrack(fakeVideoTrack);
+
+    // Add audio track
     navigator.mediaDevices
         .getUserMedia({
-            video: true,
             audio: true,
         })
         .then(async (localMedia) => {
             audioTracks = localMedia.getAudioTracks();
-            videoTracks = localMedia.getVideoTracks();
             localStream.addTrack(audioTracks[0]);
-            localStream.addTrack(videoTracks[0]);
             audioTracks[0].enabled = true;
-            videoTracks[0].enabled = true;
+            audioBtn.classList.add("audio-active");
+            audioOffSvg.style.display = "none";
+        })
+        .catch((e) => {
+            console.log("no audio", e);
+            audioBtn.classList.add("button-forbidden");
         });
 
     function cameraBtnClick() {
-        videoTracks[0].enabled = !videoTracks[0].enabled;
+        if (!cameraExist) {
+            const message = `偵測不到攝影機，請確認已在您的裝置上啟用攝影機後重新進入語音頻道。`;
+            alert(message);
+            return;
+        }
 
-        if (videoTracks[0].enabled) {
-            localVideo.style.display = "block";
-            cameraBtn.classList.add("camera-active");
-        } else {
+        // Turn the camera on
+        if (!cameraToggle) {
+            navigator.mediaDevices
+                .getUserMedia({
+                    video: true,
+                })
+                .then(async (localMedia) => {
+                    videoTracks = localMedia.getVideoTracks();
+                    videoTracks[0].enabled = true;
+                    mediaConnections.forEach((connection) => {
+                        connection.getSenders()[1].replaceTrack(videoTracks[0]);
+                    });
+                    localVideo.style.display = "block";
+                    cameraBtn.classList.add("camera-active");
+                    localStream.removeTrack(fakeVideoTrack);
+                    localStream.addTrack(videoTracks[0]);
+                    // console.log(localStream.getVideoTracks());
+                    cameraToggle = true;
+                })
+                .catch((e) => {
+                    console.log("no camera", e);
+                    cameraBtn.classList.remove("camera-active");
+                    cameraBtn.classList.add("button-forbidden");
+                    localVideo.style.display = "none";
+                    cameraExist = false;
+                });
+            return;
+        }
+
+        // Turn the camera off
+        if (cameraToggle) {
             localVideo.style.display = "none";
             cameraBtn.classList.remove("camera-active");
+            mediaConnections.forEach((connection) => {
+                connection.getSenders()[1].replaceTrack(fakeVideoTrack);
+            });
+            videoTracks[0].enabled = false;
+            videoTracks[0].stop();
+            localStream.removeTrack(videoTracks[0]);
+            localStream.addTrack(fakeVideoTrack);
+            cameraToggle = false;
         }
     }
-    cameraBtn.addEventListener("click", cameraBtnClick);
 
-    audioBtn.addEventListener("click", (e) => {
+    function audioBtnClick() {
+        // if (noAudioDevice) {
+        //     return; // add some warning
+        // }
         audioTracks[0].enabled = !audioTracks[0].enabled;
 
         if (audioTracks[0].enabled) {
@@ -437,37 +518,16 @@ function createLocalStream() {
             settingUnmuteSvg.style.display = "none";
             settingMuteSvg.style.display = "inline";
         }
-    });
+    }
 
-    leaveBtn.addEventListener("click", (event) => {
+    function leaveBtnClick() {
         peer.destroy();
-        // const sendData = {
-        //     action: "leave",
-        // };
-        // webSocket.send(JSON.stringify(sendData));
-
-        // // Stop local stream
-        // if (localStream) {
-        //     localStream.getTracks().forEach((track) => {
-        //         track.stop();
-        //     });
-        //     localStream = null;
-        // }
-
-        // // Delete remote video
-        // Object.keys(channelMap).forEach((key) => {
-        //     const remoteVideo = document.querySelector(
-        //         `#${channelMap[key]["peerUsername"]}-video`
-        //     );
-        //     removeVideo(remoteVideo);
-        //     delete channelMap[key];
-        // });
-        // if (Object.keys(channelMap).length === 0) {
-        //     onePeopleVideo.style.display = "block";
-        // }
-
         location.reload();
-    });
+    }
+
+    cameraBtn.addEventListener("click", cameraBtnClick);
+    audioBtn.addEventListener("click", audioBtnClick);
+    leaveBtn.addEventListener("click", leaveBtnClick);
 
     localVideo.srcObject = localStream;
     localVideo.muted = true;
