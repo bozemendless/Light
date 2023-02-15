@@ -55,10 +55,14 @@ function init() {
     getUserData();
 
     // Get chat logs
-    getChatLogs().then((chatLogs) => {
-        // Show chat logs
-        createChatLogs(chatLogs);
-    });
+    getChatLogs()
+        .then((chatLogs) => {
+            // Show chat logs
+            createChatLogs(chatLogs);
+        })
+        .then(() => {
+            messageList.scrollTop = messageList.scrollHeight;
+        });
 
     // Create My Peer Object
     peer = createMyPeer();
@@ -259,6 +263,24 @@ function createChatLogs(data) {
     yesterday.setDate(yesterday.getDate() - 1);
 
     data.forEach((chatLog) => {
+        // if a user was texting continuously, the dom structure will be different
+        let isSameUserTexting = false;
+
+        // the fist message in the history would not have previous log >> lastUserDiv | null
+        const lastUserDiv = messageList.lastChild;
+
+        // check if is first chat log
+        if (lastUserDiv) {
+            const lastUser =
+                lastUserDiv.querySelector(".message-user").textContent;
+            // check if the same user texting continuously
+            if (lastUser === chatLog["username"]) {
+                isSameUserTexting = true;
+            } else {
+                isSameUserTexting = false;
+            }
+        }
+
         const messageDiv = document.createElement("div");
         const messageContentDiv = document.createElement("div");
         const messageUserAvatar = document.createElement("img");
@@ -285,6 +307,11 @@ function createChatLogs(data) {
 
         messageUser.textContent = chatLog["username"];
         messageContent.textContent = chatLog["message"];
+
+        // if is different user texting
+        if (isSameUserTexting) {
+            messageContentDiv.classList.add("same-user-texting");
+        }
 
         // Avatar
         messageUserAvatar.src = url;
