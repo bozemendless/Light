@@ -8,8 +8,8 @@ let currentInChanneL;
 let clickedChannel;
 const settingUnmuteSvg = document.querySelector("#setting-unmute-svg");
 const settingMuteSvg = document.querySelector("#setting-mute-svg");
-let localStream = null;
 const mediaConnections = [];
+// const roomMember = [];
 
 // Channel label views
 const messageList = document.querySelector("#message-list");
@@ -62,13 +62,14 @@ function init() {
         })
         .then(() => {
             messageList.scrollTop = messageList.scrollHeight;
+            messageInput.focus();
         });
 
     // Create My Peer Object
     peer = createMyPeer();
 
     // Default media toggle
-    settingMuteSvg.style.display = "none";
+    settingMuteSvg.style.display = "inline";
 }
 
 function createMyPeer() {
@@ -93,10 +94,10 @@ init();
 function joinVoiceChannel() {
     // Change my already in Channel Name
     currentInChanneL = "general-video-channel";
-    const localStream = createLocalStream();
+    // const localStream = createLocalStream();
+    createLocalStream();
 
     // Listen on WebSocket messages
-    let peerUsernameInRemoteVideo;
     webSocket.addEventListener("message", (event) => {
         const parsedData = JSON.parse(event.data);
         if (parsedData.type === "sdp") {
@@ -135,9 +136,12 @@ function joinVoiceChannel() {
                 const call = peer.call(newPeerId, localStream);
                 mediaConnections.push(call.peerConnection);
                 // console.log(call.peerConnection.getSenders()[0]);
-                const remoteVideo = createRemoteVideo(peerUsername);
+                const { remoteVideo, remoteAudio } =
+                    createRemoteVideo(peerUsername);
                 call.on("stream", (stream) => {
+                    // console.log(stream.getVideoTracks());
                     remoteVideo.srcObject = stream;
+                    remoteAudio.srcObject = stream;
                 });
             }
 
@@ -147,7 +151,6 @@ function joinVoiceChannel() {
                 const userId = parsedData["data"]["user_id"];
                 const peerChannelName =
                     parsedData["data"]["answer_channel_name"];
-                peerUsernameInRemoteVideo = peerUsername;
                 channelMap[`${peerChannelName}`] = {
                     peerUsername: peerUsername,
                     peerId: existingPeerId,
@@ -197,11 +200,17 @@ function joinVoiceChannel() {
         call.answer(localStream);
 
         mediaConnections.push(call.peerConnection);
+        let remotePeerUsername;
+        for (let peer in channelMap) {
+            remotePeerUsername = channelMap[peer].peerUsername;
+        }
 
-        const remoteVideo = createRemoteVideo(peerUsernameInRemoteVideo);
+        const { remoteVideo, remoteAudio } =
+            createRemoteVideo(remotePeerUsername);
 
         call.on("stream", (stream) => {
             remoteVideo.srcObject = stream;
+            remoteAudio.srcObject = stream;
         });
         call.on("error", (e) => {
             console.log(e);
@@ -288,6 +297,9 @@ function createChatLogs(data) {
         const messageUser = document.createElement("span");
         const messageTime = document.createElement("span");
         const messageContent = document.createElement("div");
+        const messageContentTextNode = document.createTextNode(
+            chatLog["message"].replace(/&newline;/g, "\n")
+        );
 
         messageList.appendChild(messageDiv);
         messageDiv.appendChild(messageContentDiv);
@@ -296,6 +308,7 @@ function createChatLogs(data) {
         messageContentDiv.appendChild(messageContent);
         messageHeader.appendChild(messageUser);
         messageHeader.appendChild(messageTime);
+        messageContent.appendChild(messageContentTextNode);
 
         messageDiv.className = "message-div";
         messageUserAvatar.className = "message-user-avatar";
@@ -306,7 +319,6 @@ function createChatLogs(data) {
         messageContent.className = "message-content";
 
         messageUser.textContent = chatLog["username"];
-        messageContent.textContent = chatLog["message"];
 
         // if is different user texting
         if (isSameUserTexting) {
@@ -346,6 +358,7 @@ function createChatLogs(data) {
         }
         messageTime.textContent = displayTime;
     });
+    messageList.scrollTop = messageList.scrollHeight;
 }
 
 // WebSocket
@@ -364,12 +377,48 @@ function webSocketConnect() {
         isSocketConnect = true;
     });
 
-    // Listen to chat message
     webSocket.addEventListener("message", (event) => {
         const parsedData = JSON.parse(event.data);
+
+        // Listen to chat message
         if (parsedData.type === "message") {
             const arr = [parsedData.data];
             createChatLogs(arr);
+        }
+
+        // Listen to notifications
+        if (parsedData.type === "notification") {
+            if (parsedData.data.action === "channel_list") {
+                // console.log(parsedData.data.general_voice_channel);
+                // [{peer_username:peer_username, peer_channel_name: peer_channel_name}]
+                const members = parsedData.data.general_voice_channel;
+                showChannelMember("join_room", members);
+            }
+            if (parsedData.data.action === "join_room") {
+                // console.log(
+                //     `${parsedData.data.peer_username} 進入了語音頻道，他的 channel name 是 ${parsedData.data.peer_channel_name}`
+                // );
+                const members = [
+                    {
+                        peer_username: parsedData.data.peer_username,
+                        peer_channel_name: parsedData.data.peer_channel_name,
+                    },
+                ];
+                showChannelMember("join_room", members);
+            }
+            if (parsedData.data.action === "leave_room") {
+                //
+                // console.log(
+                //     `${parsedData.data.peer_username} 離開了語音頻道，他的 channel name 是 ${parsedData.data.peer_channel_name}`
+                // );
+                const members = [
+                    {
+                        peer_username: parsedData.data.peer_username,
+                        peer_channel_name: parsedData.data.peer_channel_name,
+                    },
+                ];
+                showChannelMember("leave_room", members);
+            }
         }
     });
 
@@ -377,6 +426,9 @@ function webSocketConnect() {
     webSocket.addEventListener("close", (event) => {
         isSocketConnect = false;
         console.log("WebSocket close", "connection closed!", event);
+        const message = "與伺服器失去連線，即將重新載入頁面。";
+        alert(message);
+        location.reload();
     });
 
     // Listen to error event
@@ -390,28 +442,33 @@ function webSocketConnect() {
 // Send Chat Message via WebSocket
 const messageInput = document.querySelector("#message-input");
 messageInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" && isSocketConnect) {
-        const messageValue = messageInput.value;
-        send_message(messageValue);
-        messageInput.value = "";
+    if (isSocketConnect) {
+        if (event.key === "Enter" && !event.shiftKey) {
+            // event.preventDefault();
+            if (messageInput.value.trim() !== "") {
+                const messageValue = messageInput.value.replace(
+                    /\n/g,
+                    "&newline;"
+                );
+                sendMessage(messageValue);
+                messageInput.value = "";
+            }
+        }
     }
 });
 
-function send_message(message) {
-    if (message !== "") {
-        const sendData = {
-            action: "message",
-            id: userId,
-            message: message,
-        };
-        webSocket.send(JSON.stringify(sendData));
-    }
+function sendMessage(message) {
+    const sendData = {
+        action: "message",
+        id: userId,
+        message: message,
+    };
+    webSocket.send(JSON.stringify(sendData));
 }
-
 // Stream
 // Local Video
-function createLocalStream() {
-    localStream = new MediaStream();
+const localStream = new MediaStream();
+async function createLocalStream() {
     const localVideo = document.querySelector("#local-video");
     const cameraBtn = document.querySelector("#camera-btn");
     const audioBtn = document.querySelector("#audio-btn");
@@ -424,15 +481,33 @@ function createLocalStream() {
 
     let cameraExist = false;
     let cameraToggle = false;
+    let audioExist = false;
 
-    // Check if camera exists
+    // Name label
+    const localVideoWrapper = document.querySelector(".local-video-wrapper");
+    const channelUsernameLabel = document.createElement("div");
+    channelUsernameLabel.className = "channel-username-label";
+    localVideoWrapper.appendChild(channelUsernameLabel);
+    channelUsernameLabel.textContent = username;
+
+    // Add fake track
+    const fakeVideoTrack = createAvatarVideoTrack();
+    // const fakeAudioTrack = createFakeAudioTrack();
+    localStream.addTrack(fakeVideoTrack);
+    // localStream.addTrack(fakeAudioTrack);
+
+    // Check if media devices exist
     navigator.mediaDevices
         .enumerateDevices()
         .then((devices) => {
+            // console.log(devices);
             devices.forEach((device) => {
                 if (device.kind === "videoinput") {
-                    console.log(device.label);
+                    // console.log(device.label);
                     cameraExist = true;
+                }
+                if (device.kind === "audioinput") {
+                    audioExist = true;
                 }
             });
         })
@@ -440,40 +515,80 @@ function createLocalStream() {
             if (!cameraExist) {
                 cameraBtn.classList.add("button-forbidden");
             }
+            if (!audioExist) {
+                audioBtn.classList.add("button-forbidden");
+            }
         });
 
-    // Create fake video track
-    function createFakeVideoTrack() {
-        let canvas = document.createElement("canvas");
-        canvas.width = 640;
-        canvas.height = 480;
-        const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#757e8a";
-        ctx.fillRect(0, 0, 640, 480);
-        let stream = canvas.captureStream();
-        return stream.getVideoTracks()[0];
-    }
-
-    // Add fake video track
-    const fakeVideoTrack = createFakeVideoTrack();
-    localStream.addTrack(fakeVideoTrack);
-
-    // Add audio track
     navigator.mediaDevices
         .getUserMedia({
             audio: true,
         })
         .then(async (localMedia) => {
             audioTracks = localMedia.getAudioTracks();
-            localStream.addTrack(audioTracks[0]);
-            audioTracks[0].enabled = true;
-            audioBtn.classList.add("audio-active");
-            audioOffSvg.style.display = "none";
-        })
-        .catch((e) => {
-            console.log("no audio", e);
-            audioBtn.classList.add("button-forbidden");
+            audioTracks.forEach((track) => {
+                localStream.addTrack(track);
+            });
+            audioTracks[0].enabled = false;
+            // console.log(localStream.getTracks());
         });
+
+    cameraBtn.addEventListener("click", cameraBtnClick);
+    audioBtn.addEventListener("click", audioBtnClick);
+    leaveBtn.addEventListener("click", leaveBtnClick);
+
+    localVideo.srcObject = localStream;
+    localVideo.muted = true;
+
+    // console.log(localStream.getTracks());
+
+    // Create silence audio track
+    // function createFakeAudioTrack() {
+    //     const ctx = new AudioContext();
+    //     const oscillator = ctx.createOscillator();
+    //     const destination = ctx.createMediaStreamDestination();
+    //     oscillator.connect(destination);
+    //     oscillator.start();
+    //     destination.stream.getAudioTracks()[0].enable = false;
+    //     return destination.stream.getAudioTracks()[0];
+    // }
+
+    // Create avatar video track
+    function createAvatarVideoTrack() {
+        let canvas = document.createElement("canvas");
+        canvas.width = 640;
+        canvas.height = 480;
+
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#757e8a";
+        ctx.fillRect(0, 0, 640, 480);
+        // const image = new Image();
+        // image.addEventListener("load", () => {
+        //     canvas.width = Math.min(image.width, image.height);
+        //     canvas.height = Math.min(image.width, image.height);
+        //     const radius = canvas.width / 2;
+        // ctx.drawImage(image, 0, 0);
+        // ctx.beginPath();
+        // ctx.arc(radius, radius, radius, 0, 2 * Math.PI);
+        // ctx.clip();
+        // ctx.drawImage(
+        //     image,
+        //     0,
+        //     0,
+        //     canvas.width,
+        //     canvas.height,
+        //     0,
+        //     0,
+        //     canvas.width,
+        //     canvas.height
+        // );
+        // });
+
+        // image.src = streamAvatarUrl;
+        const stream = canvas.captureStream(1);
+        stream.getVideoTracks()[0].enabled = true;
+        return stream.getVideoTracks()[0];
+    }
 
     function cameraBtnClick() {
         if (!cameraExist) {
@@ -492,13 +607,16 @@ function createLocalStream() {
                     videoTracks = localMedia.getVideoTracks();
                     videoTracks[0].enabled = true;
                     mediaConnections.forEach((connection) => {
-                        connection.getSenders()[1].replaceTrack(videoTracks[0]);
+                        connection.getSenders().forEach((sender) => {
+                            if (sender.track.kind === "video") {
+                                sender.replaceTrack(videoTracks[0]);
+                            }
+                        });
                     });
                     localVideo.style.display = "block";
                     cameraBtn.classList.add("camera-active");
                     localStream.removeTrack(fakeVideoTrack);
                     localStream.addTrack(videoTracks[0]);
-                    // console.log(localStream.getVideoTracks());
                     cameraToggle = true;
                 })
                 .catch((e) => {
@@ -513,11 +631,16 @@ function createLocalStream() {
 
         // Turn the camera off
         if (cameraToggle) {
-            localVideo.style.display = "none";
+            // localVideo.style.display = "none";
             cameraBtn.classList.remove("camera-active");
             mediaConnections.forEach((connection) => {
-                connection.getSenders()[1].replaceTrack(fakeVideoTrack);
+                connection.getSenders().forEach((sender) => {
+                    if (sender.track.kind === "video") {
+                        sender.replaceTrack(fakeVideoTrack);
+                    }
+                });
             });
+
             videoTracks[0].enabled = false;
             videoTracks[0].stop();
             localStream.removeTrack(videoTracks[0]);
@@ -527,11 +650,7 @@ function createLocalStream() {
     }
 
     function audioBtnClick() {
-        // if (noAudioDevice) {
-        //     return; // add some warning
-        // }
         audioTracks[0].enabled = !audioTracks[0].enabled;
-
         if (audioTracks[0].enabled) {
             audioBtn.classList.add("audio-active");
             audioOnSvg.style.display = "inline";
@@ -545,44 +664,40 @@ function createLocalStream() {
             settingUnmuteSvg.style.display = "none";
             settingMuteSvg.style.display = "inline";
         }
+        // console.log(mediaConnections[0].getSenders());
     }
 
     function leaveBtnClick() {
         peer.destroy();
         location.reload();
     }
-
-    cameraBtn.addEventListener("click", cameraBtnClick);
-    audioBtn.addEventListener("click", audioBtnClick);
-    leaveBtn.addEventListener("click", leaveBtnClick);
-
-    localVideo.srcObject = localStream;
-    localVideo.muted = true;
-
-    // Name label
-    const localVideoWrapper = document.querySelector(".local-video-wrapper");
-    const channelUsernameLabel = document.createElement("div");
-    channelUsernameLabel.className = "channel-username-label";
-    localVideoWrapper.appendChild(channelUsernameLabel);
-    channelUsernameLabel.textContent = username;
-
-    return localStream;
 }
 
 // RemoTe Video
+/*
+We need to separate the video and audio element here, because of Chrome!!! Google Chrome!!!!!
+In Chrome, video element won't autoplay before it receives the first frame!!!
+In other words, if the remote peer doesn't turn on the camera, Chrome will keep waiting for the first frame,
+    and there will be NO VOICE.
+*/
 function createRemoteVideo(peerUsername) {
     const videos = document.querySelector(".videos");
     const videoWrapper = document.createElement("div");
     const remoteVideo = document.createElement("video");
+    const remoteAudio = document.createElement("audio");
 
     videos.appendChild(videoWrapper);
     videoWrapper.appendChild(remoteVideo);
+    videoWrapper.appendChild(remoteAudio);
 
     videoWrapper.className = "video-wrapper";
     remoteVideo.id = `${peerUsername}-video`;
 
     remoteVideo.autoplay = true;
     remoteVideo.playsInline = true;
+    remoteVideo.muted = true;
+
+    remoteAudio.autoplay = true;
 
     // Name label
     const channelPeerNameLabel = document.createElement("div");
@@ -590,7 +705,7 @@ function createRemoteVideo(peerUsername) {
     videoWrapper.appendChild(channelPeerNameLabel);
     channelPeerNameLabel.textContent = peerUsername;
 
-    return remoteVideo;
+    return { remoteVideo: remoteVideo, remoteAudio: remoteAudio };
 }
 
 // RemoVe Video
@@ -600,6 +715,38 @@ function removeVideo(video) {
         videoWrapper.parentNode.removeChild(videoWrapper);
     }
     return;
+}
+
+// Show channel member
+function showChannelMember(action, members) {
+    const voiceChannelDiv = document.querySelector(".voice-channel");
+    if (action === "join_room") {
+        members.forEach((member) => {
+            const voiceUserWrapper = document.createElement("div");
+            const voiceUser = document.createElement("div");
+            const voiceUserAvatar = document.createElement("div");
+            const voiceUsername = document.createElement("div");
+            voiceUserWrapper.className = "voice-user-wrapper";
+            voiceUserWrapper.id = member.peer_channel_name;
+            voiceUser.className = "voice-user";
+            voiceUserAvatar.className = "voice-user-avatar";
+            voiceUsername.className = "voice-username";
+            voiceUsername.textContent = member.peer_username;
+            voiceUser.appendChild(voiceUserAvatar);
+            voiceUser.appendChild(voiceUsername);
+            voiceUserWrapper.appendChild(voiceUser);
+            voiceChannelDiv.appendChild(voiceUserWrapper);
+        });
+    }
+
+    if (action === "leave_room") {
+        members.forEach((member) => {
+            const leaveUserChannelId = member.peer_channel_name;
+            const leaveVoiceUserWrapper =
+                document.getElementById(leaveUserChannelId);
+            leaveVoiceUserWrapper.remove();
+        });
+    }
 }
 
 /*
