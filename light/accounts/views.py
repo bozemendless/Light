@@ -198,3 +198,121 @@ def auth(request):
         if 'token' in request.session:
             del request.session['token']
         return redirect('/login')
+
+    # Update
+    if request.method == 'PATCH':
+        # verify the token and the user password
+        if 'token' in request.session:
+            try:
+                # Decode ID in token
+                user_token = request.session['token']
+                decode_token = jwt.decode(
+                user_token, jwt_secret_key, algorithms="HS256")
+                decode_user_id = decode_token['id']
+
+                # Parse the password in request body 
+                infos = json.loads(request.body)
+                password = infos['password']
+                update_type = infos['type']
+
+                # Verify the password
+                if not Account.objects.filter(id=decode_user_id, password=password):
+                    error = 'Password is invalid'
+                    res = {
+                        'error': True, 
+                        'message': error
+                    }
+                    return JsonResponse(res, status=400)
+
+                # verity the field and update the data
+                # username
+                if update_type == 'username':
+                    new_username = infos['username']
+                    username_regex = r'^[A-Za-z0-9]{2,32}$'
+                    is_username_valid = re.search(username_regex, new_username)
+                    if not is_username_valid:
+                        error = 'Username is not valid'
+                        res = {
+                            'error': True,
+                            'message': error
+                        }
+                        return JsonResponse(res, status=400)
+                    if Account.objects.filter(username=new_username).exists():
+                        error = 'Username already exists'
+                        res = {
+                            'error': True,
+                            'message': error
+                        }
+                        return JsonResponse(res, status=400)
+                    if not Account.objects.filter(decode_user_id).update(username=new_username):
+                        error = 'Update failed'
+                        res = {
+                            'error': True,
+                            'message': error
+                        }
+                # email
+                elif update_type == 'email':
+                    new_email = infos['username']
+                    email_regex = r'^(?=.{8,64}$)\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$'
+                    is_email_valid = re.search(email_regex, new_email)
+                    if not is_email_valid:
+                        error = 'Email is not valid'
+                        res = {
+                            'error': True,
+                            'message': error
+                        }
+                        return JsonResponse(res, status=400)
+                    if Account.objects.filter(email=new_email).exists():
+                        error = 'Email already exists'
+                        res = {
+                            'error': True,
+                            'message': error
+                        }
+                        return JsonResponse(res, status=400)
+                    if not Account.objects.filter(decode_user_id).update(email=new_email):
+                        error = 'Update failed'
+                        res = {
+                            'error': True,
+                            'message': error
+                        }
+                # password
+                elif update_type == 'password':
+                    new_password = infos['password']
+                    new_password_confirm = infos['passwordConfirm']
+                    if new_password != new_password_confirm:
+                        error = 'Passwords entered twice are different'
+                        res = {
+                            'error': True,
+                            'message': error
+                        }
+                        return JsonResponse(res, status=400)
+                    password_regex = r'.{6,72}$'
+                    is_password_valid = re.search(password_regex, new_password)
+                    if not is_password_valid:
+                        error = 'Password is not valid'
+                        res = {
+                            'error': True,
+                            'message': error
+                        }
+                        return JsonResponse(res, status=400)
+                    if not Account.objects.filter(decode_user_id).update(password=new_password):
+                        error = 'Update failed'
+                        res = {
+                            'error': True,
+                            'message': error
+                        }
+                res = {
+                    'ok': True
+                }
+                return JsonResponse(res)
+
+            except:
+                error = 'Internal Server Error'
+                res = {
+                    'error':True,
+                    'message': error
+                }
+                return JsonResponse(res, status=500)
+
+        # # token not in session
+        return redirect('/login')
