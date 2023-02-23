@@ -53,6 +53,11 @@ html, body {
     border-radius: 10px;
 }
 
+textarea {
+    resize: none;
+    overflow: hidden;
+}
+
 .pointer, button {
     cursor: pointer;
 }
@@ -63,8 +68,10 @@ html, body {
 
 /* ==================================== */
 .container {
-    display:flex;
+    display: flex;
     width: 100%;
+    height: 100vh;
+    position: relative;
 }
 
 .sidebar {
@@ -133,13 +140,16 @@ html, body {
 
 main {
     width: calc(100% - 240px);
+    height: 100%;
 }
 
 .main-container {
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    position: relative;
 }
 
 .channel-list {
@@ -149,7 +159,7 @@ main {
 .name-block {
     display: flex;
     width: 100%;
-    min-height: 50px;
+    height: 50px;
     border-bottom: 2px solid #292b30;
 }
 
@@ -198,7 +208,7 @@ main {
     font-size: 16px;
     color: #8e9297;
     cursor: pointer;
-    margin: auto;
+    margin: 0 auto 3px;
     font-weight: 400;
     border-radius: 5px;
     line-height: 30px;
@@ -220,6 +230,42 @@ main {
 
 .channel-name-label>svg {
     margin-right: 6px;
+}
+
+.voice-user-wrapper {
+    width: 232px;
+    /* height: 40px; */
+    padding-left: 36px;
+    padding-bottom: 3px;
+}
+
+.voice-user {
+    height: 100%;
+    width: 100%;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.voice-user:hover {
+    background-color: #35373c;
+}
+
+.voice-user-avatar {
+    width: 24px;
+    height: 24px;
+    margin: 3px 8px;
+    background-color: #fff;
+    border-radius: 50%;
+    /* background-image: url("/light/channel/static/channel/imgs/default_avatar-32x32.png"); */
+}
+
+.voice-username {
+    font-size: 14px;
+    color: #989AA2;
+    font-weight: 500;
+    line-height: 32px;
+    width: 128px;
 }
 
 .setting {
@@ -311,28 +357,31 @@ path {
 /* Chat */
 
 .chat {
-    height: calc(100vh - 50px);
+    height: calc(100% - 50px);
     display: flex;
     flex-direction: column;
-    display:none;
     user-select: text;
+    flex-grow: 1;
 }
 
 .messages-wrapper {
-    height: calc(100% - 75px);
+    min-height: calc(100% - 142px);
     user-select: text;
+    flex-grow: 1;
+    display: flex;
 }
 
 #messages {
-    max-height: calc(100vh - 141px);
     user-select: text;
+    flex-grow: 1;
+    display: flex;
 }
 
 .message-list {
-    overflow-y: auto;
-    max-height: calc(100vh - 141px);
     width: calc(100% - 3px);
     user-select: text;
+    flex-grow: 1;
+    overflow-y: auto;
 }
 
 .message-div {
@@ -391,7 +440,17 @@ path {
     font-weight: 400;
     line-height: 22px;
     user-select: text;
+    white-space: pre;
 }
+
+/* .same-user-texting {
+    margin-top: 0;
+    height: auto
+}
+
+.same-user-texting > img, .same-user-texting>.message-header {
+    display: none;
+} */
 
 
 /* Video */
@@ -559,18 +618,20 @@ video:hover {
 }
 
 #chatInput {
-    margin-top: 17px;
+    /* margin-top: 17px; */
+    padding: 0 16px;
+    margin-bottom: 24px;
 }
 
 #message-input {
-    width: calc(100% - 30px);
-    margin: auto;
-    height: 50px;
+    width: 100%;
+    height: auto;
+    min-height: 50px;
     display: block;
     background-color: #40444b;
-    margin-bottom: 25px;
     font-size: 16px;
-    padding: 20px;
+    /* padding-top: 14px; */
+    padding-left: 20px;
     color: #d3d4d5;
     border-radius: 10px;
     font-weight: 400;
