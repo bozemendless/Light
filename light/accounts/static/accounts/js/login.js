@@ -72,7 +72,7 @@ function getInfos() {
 
 async function loginFetch(info) {
     const token = document.getElementsByName("csrfmiddlewaretoken")[0].value;
-    const loginUrl = "/api/login";
+    const loginUrl = "/api/user/auth";
 
     const options = {
         method: "PUT",

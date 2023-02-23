@@ -244,7 +244,7 @@ generalVideoChannel.addEventListener("click", () => {
 
 // Functions
 async function getUserData() {
-    const getUserDataUrl = "/api/account";
+    const getUserDataUrl = "/api/user/auth";
 
     const response = await fetch(getUserDataUrl);
     const data = await response.json();

@@ -1,14 +1,14 @@
+from .models import Account
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
+from django.contrib.auth.hashers import make_password, check_password
+from dotenv import load_dotenv
+from datetime import timedelta
+import datetime
 import json
 import re
-from .models import Account
 import jwt
 import os
-from dotenv import load_dotenv
-import datetime
-from datetime import timedelta
-from django.contrib.auth.hashers import make_password, check_password
 
 load_dotenv()
 jwt_secret_key = os.getenv('JWT_SECRET_KEY')
@@ -43,63 +43,7 @@ def register_page(request):
     return render(request, 'accounts/register.html')  
 
 # APIs
-def login(request):
-    if request.method == 'PUT':
-        try:
-            # Parse the form
-            infos = json.loads(request.body)
-            email = infos['email']
-            password = infos['password']
-
-            # check if login infos are valid: 
-                # if account exists, return a queryset of pk(id) and password.
-                # if not exist, return an empty queryset.
-            account_set = Account.objects.filter(email=email).values('pk', 'password')
-
-            # account exists
-            if account_set:
-                account_id = account_set[0]['pk']
-                encoded_password = account_set[0]['password']
-
-                # password is valid
-                if check_password(password,encoded_password):
-                    payload = {
-                        "id": account_id,
-                        "exp": datetime.datetime.utcnow() + timedelta(days=7)
-                    }
-                    encoded_id = jwt.encode(payload, jwt_secret_key) # use encoded id as token
-                    request.session['token'] = encoded_id
-                    res = {
-                        'ok': True
-                    }
-                    return JsonResponse(res)
-
-                # password is invalid
-                if not check_password(password,encoded_password):
-                    error = 'Password is invalid'
-                    res = {
-                        'error': True, 
-                        'message': error
-                    }
-                    return JsonResponse(res, status=400)
-
-            # account not exist
-            if not account_set:
-                error = 'Email does NOT exist'
-                res = {
-                    'error': True,
-                    'message': error
-                }
-                return JsonResponse(res, status=400)
-        except:
-            error = 'Internal Server Error'
-            res = {
-                'error':True,
-                'message': error
-            }
-            return JsonResponse(res, status=500)
-        
-
+# Register: '/api/user'
 def register(request):
     if request.method == 'POST':
         try:
@@ -166,21 +110,91 @@ def register(request):
             }
             return JsonResponse(res, status=500)
 
-def get_account_data(request):
-    # token in session
-    if 'token' in request.session:
+# Get, Login, Logout, Update : 'api/user/auth'
+def auth(request):
+    # Get account data
+    if request.method == 'GET':
+        # verify the token
+        if 'token' in request.session:
+            try:
+                user_token = request.session['token']
+                decode_token = jwt.decode(
+                user_token, jwt_secret_key, algorithms="HS256")
+                decode_user_id = decode_token['id']
+                account_set = Account.objects.filter(id=decode_user_id).values('username')
+                if account_set:
+                    username = account_set[0]['username']
+                user_id = decode_token['id']
+                res = {
+                    'id': user_id,
+                    'username': username,
+                }
+                return JsonResponse(res)
+            except:
+                del request.session['token']
+                if request.path != '/login':
+                    return redirect('/login')
+        # # token not in session
+        return redirect('/login')
+
+    # Login
+    if request.method == 'PUT':
         try:
-            user_token = request.session['token']
-            decode_token = jwt.decode(
-            user_token, jwt_secret_key, algorithms="HS256")
-            user_id = (decode_token['id'])
-            res = {
-                'id': user_id
-            }
-            return JsonResponse(res)
+            # Parse the form
+            infos = json.loads(request.body)
+            email = infos['email']
+            password = infos['password']
+
+            # check if login infos are valid: 
+                # if account exists, return a queryset of pk(id) and password.
+                # if not exist, return an empty queryset.
+            account_set = Account.objects.filter(email=email).values('pk', 'password')
+
+            # account exists
+            if account_set:
+                account_id = account_set[0]['pk']
+                encoded_password = account_set[0]['password']
+
+                # password is valid
+                if check_password(password,encoded_password):
+                    payload = {
+                        "id": account_id,
+                        "exp": datetime.datetime.utcnow() + timedelta(days=7)
+                    }
+                    encoded_id = jwt.encode(payload, jwt_secret_key) # use encoded id as token
+                    request.session['token'] = encoded_id
+                    res = {
+                        'ok': True
+                    }
+                    return JsonResponse(res)
+
+                # password is invalid
+                if not check_password(password,encoded_password):
+                    error = 'Password is invalid'
+                    res = {
+                        'error': True, 
+                        'message': error
+                    }
+                    return JsonResponse(res, status=400)
+
+            # account not exist
+            if not account_set:
+                error = 'Email does NOT exist'
+                res = {
+                    'error': True,
+                    'message': error
+                }
+                return JsonResponse(res, status=400)
         except:
+            error = 'Internal Server Error'
+            res = {
+                'error':True,
+                'message': error
+            }
+            return JsonResponse(res, status=500)
+
+    # Logout
+    if request.method == 'DELETE':
+        if 'token' in request.session:
             del request.session['token']
-            if request.path != '/login':
-                return redirect('/login')
-    # # token not in session
-    return redirect('/login')
+        return redirect('/login')

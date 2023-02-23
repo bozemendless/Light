@@ -92,7 +92,7 @@ function getInfos() {
 // send register info
 async function registerFetch(info) {
     const token = document.getElementsByName("csrfmiddlewaretoken")[0].value;
-    const registerUrl = "/api/register";
+    const registerUrl = "/api/user";
 
     const options = {
         method: "POST",
