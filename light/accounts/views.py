@@ -121,13 +121,15 @@ def auth(request):
                 decode_token = jwt.decode(
                 user_token, jwt_secret_key, algorithms="HS256")
                 decode_user_id = decode_token['id']
-                account_set = Account.objects.filter(id=decode_user_id).values('username')
+                account_set = Account.objects.filter(id=decode_user_id).values('username', 'email')
                 if account_set:
                     username = account_set[0]['username']
+                    email = account_set[0]['email']
                 user_id = decode_token['id']
                 res = {
                     'id': user_id,
                     'username': username,
+                    'email': email,
                 }
                 return JsonResponse(res)
             except:
@@ -204,6 +206,9 @@ def auth(request):
         # verify the token and the user password
         if 'token' in request.session:
             try:
+                # Response object
+                res_err = False
+                res = {}
                 # Decode ID in token
                 user_token = request.session['token']
                 decode_token = jwt.decode(
@@ -211,102 +216,88 @@ def auth(request):
                 decode_user_id = decode_token['id']
 
                 # Parse the password in request body 
-                infos = json.loads(request.body)
+                infos = json.loads(request.body.decode('utf-8'))
+
                 password = infos['password']
                 update_type = infos['type']
 
                 # Verify the password
-                if not Account.objects.filter(id=decode_user_id, password=password):
+                account_set = Account.objects.filter(id=decode_user_id).values('password')
+                encoded_password = account_set[0]['password']
+                if not check_password(password, encoded_password):
                     error = 'Password is invalid'
-                    res = {
-                        'error': True, 
-                        'message': error
-                    }
-                    return JsonResponse(res, status=400)
+                    res['message'] = error
+                    res_err = True
 
                 # verity the field and update the data
                 # username
-                if update_type == 'username':
-                    new_username = infos['username']
+                elif update_type == 'username':
+                    new_username = infos['value']
                     username_regex = r'^[A-Za-z0-9]{2,32}$'
                     is_username_valid = re.search(username_regex, new_username)
                     if not is_username_valid:
                         error = 'Username is not valid'
-                        res = {
-                            'error': True,
-                            'message': error
-                        }
-                        return JsonResponse(res, status=400)
-                    if Account.objects.filter(username=new_username).exists():
+                        res['message'] = error
+                        res_err = True
+                    elif Account.objects.filter(username=new_username).exists():
                         error = 'Username already exists'
-                        res = {
-                            'error': True,
-                            'message': error
-                        }
-                        return JsonResponse(res, status=400)
-                    if not Account.objects.filter(decode_user_id).update(username=new_username):
+                        res['message'] = error
+                        res_err = True
+                    elif not Account.objects.filter(id=decode_user_id).update(username=new_username):
                         error = 'Update failed'
-                        res = {
-                            'error': True,
-                            'message': error
-                        }
+                        res['message'] = error
+                        res_err = True
+                    else:
+                        res['value'] = new_username
                 # email
                 elif update_type == 'email':
-                    new_email = infos['username']
+                    new_email = infos['value']
                     email_regex = r'^(?=.{8,64}$)\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$'
                     is_email_valid = re.search(email_regex, new_email)
                     if not is_email_valid:
                         error = 'Email is not valid'
-                        res = {
-                            'error': True,
-                            'message': error
-                        }
-                        return JsonResponse(res, status=400)
-                    if Account.objects.filter(email=new_email).exists():
+                        res['message'] = error
+                        res_err = True
+                    elif Account.objects.filter(email=new_email).exists():
                         error = 'Email already exists'
-                        res = {
-                            'error': True,
-                            'message': error
-                        }
-                        return JsonResponse(res, status=400)
-                    if not Account.objects.filter(decode_user_id).update(email=new_email):
+                        res['message'] = error
+                        res_err = True
+                    elif not Account.objects.filter(id=decode_user_id).update(email=new_email):
                         error = 'Update failed'
-                        res = {
-                            'error': True,
-                            'message': error
-                        }
+                        res['message'] = error
+                        res_err = True
+                    else:
+                        res['value'] = new_email
                 # password
                 elif update_type == 'password':
-                    new_password = infos['password']
-                    new_password_confirm = infos['passwordConfirm']
+                    new_password = infos['value']
+                    new_password_confirm = infos['valueConfirm']
                     if new_password != new_password_confirm:
                         error = 'Passwords entered twice are different'
-                        res = {
-                            'error': True,
-                            'message': error
-                        }
-                        return JsonResponse(res, status=400)
+                        res['message'] = error
+                        res_err = True
                     password_regex = r'.{6,72}$'
                     is_password_valid = re.search(password_regex, new_password)
                     if not is_password_valid:
                         error = 'Password is not valid'
-                        res = {
-                            'error': True,
-                            'message': error
-                        }
-                        return JsonResponse(res, status=400)
+                        res['message'] = error
+                        res_err = True
                     if not Account.objects.filter(decode_user_id).update(password=new_password):
                         error = 'Update failed'
-                        res = {
-                            'error': True,
-                            'message': error
-                        }
-                res = {
-                    'ok': True
-                }
-                return JsonResponse(res)
+                        res['message'] = error
+                        res_err = True
 
-            except:
+                if res_err:
+                    status = 400
+                    res['error']= True
+                else:
+                    status = 200
+                    res['ok'] = True
+
+                return JsonResponse(res, status=status)
+
+            except Exception as e:
+                print(e)
                 error = 'Internal Server Error'
                 res = {
                     'error':True,
