@@ -1,6 +1,7 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from chats.views import save_chat_logs
+from channels.exceptions import StopConsumer
 
 general_voice_channel_list = []
 
@@ -16,18 +17,19 @@ class ChannelConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         # send current online member
-        data = {
-            'action': 'channel_list',
-            'general_voice_channel': general_voice_channel_list
-        }
-
-        await self.channel_layer.send(
-            self.channel_name,
-            {
-                'type': 'send_channel_list',
-                'data': data
+        if not general_voice_channel_list:
+            data = {
+                'action': 'channel_list',
+                'general_voice_channel': general_voice_channel_list
             }
-        )
+
+            await self.channel_layer.send(
+                self.channel_name,
+                {
+                    'type': 'send_channel_list',
+                    'data': data
+                }
+            )
 
     async def disconnect(self, close_code):
         data = {
@@ -71,6 +73,8 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         print('disconnect', close_code)
+
+        raise StopConsumer()
 
     async def receive(self, text_data):
         try:
