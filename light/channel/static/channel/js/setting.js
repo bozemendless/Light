@@ -2,6 +2,8 @@ const main = document.querySelector("main");
 const settingBtn = document.querySelector(".setting-button");
 const settingPage = document.querySelector(".setting-page");
 const exitBtn = document.querySelector(".exit");
+const authUrl = "/api/user/auth";
+const token = document.getElementsByName("csrfmiddlewaretoken")[0].value;
 const editLayerHTML = `<div class="edit-layer" id="edit-layer"></div>`;
 const editUsernameHTML = `<div class="editor username-editor" id="username-editor">
 <div class="editor-title-wrapper">
@@ -15,15 +17,23 @@ const editUsernameHTML = `<div class="editor username-editor" id="username-edito
 </div>
 <div class="editor-content-wrapper">
     <div class="editor-username-wrapper">
-        <div class="editor-username-title">使用者名稱</div>
+        <div class="editor-username-title">
+            使用者名稱
+            <span class="error-separator"> - </span>
+            <span class="input-error-message" id="username-message"></span>
+        </div>
         <div class="editor-username-div">
-            <input class="editor-username-input" value="test" autocomplete="new-text" />
+            <input class="editor-username-input" id="username-input" autocomplete="new-text" />
         </div>
     </div>
     <div class="editor-password-wrapper">
-        <div class="editor-password-title">目前密碼</div>
+        <div class="editor-password-title">
+            目前密碼
+            <span class="error-separator"> - </span>
+            <span class="input-error-message" id="password-message"></span>
+        </div>
         <div class="editor-password-div">
-            <input type="password" class="editor-password-input" autocomplete="new-password" />
+            <input type="password" class="editor-password-input" id="password-input" onMouseDown="this.removeAttribute('readonly')" />
         </div>
     </div>
 </div>
@@ -31,7 +41,7 @@ const editUsernameHTML = `<div class="editor username-editor" id="username-edito
     <div class="editor-cancer-div pointer" id="cancer">
         <div class="editor-cancer-button">取消</div>
     </div>
-    <div class="editor-confirm-div pointer">
+    <div class="editor-confirm-div pointer" id="username-edit-button">
         <div class="editor-confirm-button">完成</div>
     </div>
 </div>
@@ -48,15 +58,23 @@ const editEmailHTML = `<div class="editor email-editor" id="email-editor">
 </div>
 <div class="editor-content-wrapper">
     <div class="editor-email-wrapper">
-        <div class="editor-email-title">電子郵件</div>
+        <div class="editor-email-title">
+            電子郵件
+            <span class="error-separator"> - </span>
+            <span class="input-error-message" id="email-message"></span>
+        </div>
         <div class="editor-email-div">
-            <input class="editor-email-input" value="test@gmail.com" autocomplete="new-text" />
+            <input class="editor-email-input" id="email-input" autocomplete="new-text" />
         </div>
     </div>
     <div class="editor-password-wrapper">
-        <div class="editor-password-title">目前密碼</div>
+        <div class="editor-password-title">
+            目前密碼
+            <span class="error-separator"> - </span>
+            <span class="input-error-message" id="password-message"></span>
+        </div>
         <div class="editor-password-div">
-            <input type="password" class="editor-password-input" autocomplete="new-password" />
+            <input type="password" class="editor-password-input" id="password-input" onMouseDown="this.removeAttribute('readonly')" />
         </div>
     </div>
 </div>
@@ -64,7 +82,7 @@ const editEmailHTML = `<div class="editor email-editor" id="email-editor">
     <div class="editor-cancer-div pointer" id="cancer">
         <div class="editor-cancer-button">取消</div>
     </div>
-    <div class="editor-confirm-div pointer">
+    <div class="editor-confirm-div pointer" id="email-edit-button">
         <div class="editor-confirm-button">完成</div>
     </div>
 </div>
@@ -87,11 +105,15 @@ exitBtn.addEventListener("click", () => {
 });
 
 editUsernameBtn.addEventListener("click", () => {
+    let oldUsername = username;
     main.insertAdjacentHTML("beforeend", editLayerHTML + editUsernameHTML);
     const editLayer = document.querySelector("#edit-layer");
     const usernameEditor = document.querySelector("#username-editor");
     const editorClose = document.querySelector("#editor-close");
     const cancer = document.querySelector("#cancer");
+    const usernameEditBtn = document.querySelector("#username-edit-button");
+    const newUsernameInput = document.querySelector("#username-input");
+    newUsernameInput.value = username;
     editLayer.addEventListener("click", () => {
         editLayer.remove();
         usernameEditor.remove();
@@ -104,7 +126,131 @@ editUsernameBtn.addEventListener("click", () => {
         editLayer.remove();
         usernameEditor.remove();
     });
+    usernameEditBtn.addEventListener("click", async () => {
+        const newUsername = newUsernameInput.value;
+        if (newUsername === username) {
+            editLayer.remove();
+            usernameEditor.remove();
+            return;
+        }
+        const password = document.querySelector("#password-input").value;
+        const result = await updateAccountInfo(
+            "username",
+            newUsername,
+            password
+        );
+        if (result) {
+            editLayer.remove();
+            usernameEditor.remove();
+            username = result.value;
+            updateUsername(result.value);
+            updateChatUsername(oldUsername, result.value);
+        }
+    });
 });
+
+async function updateAccountInfo(type, newValue, password) {
+    // Check fields
+    // regex
+    const usernameRegex = /^[A-Za-z0-9]{2,32}$/;
+    const emailRegex =
+        /^(?=.{8,64}$)\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
+    const passwordRegex = /^.{6,72}$/;
+    // error message
+    const editorUsernameWrapper = document.querySelector(
+        ".editor-username-wrapper"
+    );
+    const editorEmailWrapper = document.querySelector(".editor-email-wrapper");
+    const editorPasswordWrapper = document.querySelector(
+        ".editor-password-wrapper"
+    );
+    const usernameInputMessage = document.querySelector("#username-message");
+    const emailInputMessage = document.querySelector("#email-message");
+    const passwordInputMessage = document.querySelector("#password-message");
+    // if valid
+    let valueValid = false;
+    let passwordValid = false;
+    // fetch body: info
+    const info = { type: type, value: newValue, password: password };
+
+    // Type
+    // username
+    if (type === "username") {
+        if (newValue === "") {
+            usernameInputMessage.textContent = "請輸入使用者名稱。";
+            editorUsernameWrapper.classList.add("error-wrapper");
+        } else if (!usernameRegex.test(newValue)) {
+            usernameInputMessage.textContent = "長度必須在 2 和 32 之間。";
+            editorUsernameWrapper.classList.add("error-wrapper");
+        } else {
+            editorUsernameWrapper.classList.remove("error-wrapper");
+            valueValid = true;
+        }
+        // email
+    } else if (type === "email") {
+        if (newValue === "") {
+            emailInputMessage.textContent = "請輸入電子信箱。";
+            editorEmailWrapper.classList.add("error-wrapper");
+        } else if (!emailRegex.test(newValue)) {
+            emailInputMessage.textContent = "請輸入正確格式的電子信箱。";
+            editorEmailWrapper.classList.add("error-wrapper");
+        } else {
+            editorEmailWrapper.classList.remove("error-wrapper");
+            valueValid = true;
+        }
+    }
+    //password
+    if (password === "") {
+        passwordInputMessage.textContent = "請輸入密碼。";
+        editorPasswordWrapper.classList.add("error-wrapper");
+    } else if (!passwordRegex.test(password)) {
+        passwordInputMessage.textContent = "密碼必須在 6 和 72 之間。";
+        editorPasswordWrapper.classList.add("error-wrapper");
+    } else {
+        editorPasswordWrapper.classList.remove("error-wrapper");
+        passwordValid = true;
+    }
+    // if newValue or password field invalid
+    if (!valueValid || !passwordValid) {
+        return false;
+    }
+
+    // fetch options
+    const options = {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": token,
+        },
+        body: JSON.stringify(info),
+    };
+
+    // Call the API to Update the user info
+    try {
+        const response = await fetch(authUrl, options);
+        const data = await response.json();
+
+        if (!response.ok) {
+            if (data.message === "Password is invalid") {
+                passwordInputMessage.textContent = "密碼錯誤。";
+                editorPasswordWrapper.classList.add("error-wrapper");
+            } else if (data.message === "Username already exists") {
+                usernameInputMessage.textContent = "使用者名稱已被使用。";
+                editorUsernameWrapper.classList.add("error-wrapper");
+            } else if (data.message === "Email already exists") {
+                emailInputMessage.textContent = "電子郵件已被使用。";
+                editorEmailWrapper.classList.add("error-wrapper");
+            }
+
+            return false;
+        }
+
+        return data;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
 
 editEmailBtn.addEventListener("click", () => {
     main.insertAdjacentHTML("beforeend", editLayerHTML + editEmailHTML);
@@ -112,6 +258,9 @@ editEmailBtn.addEventListener("click", () => {
     const emailEditor = document.querySelector("#email-editor");
     const editorClose = document.querySelector("#editor-close");
     const cancer = document.querySelector("#cancer");
+    const emailEditBtn = document.querySelector("#email-edit-button");
+    const newEmailInput = document.querySelector("#email-input");
+    newEmailInput.value = email;
     editLayer.addEventListener("click", () => {
         editLayer.remove();
         emailEditor.remove();
@@ -123,6 +272,22 @@ editEmailBtn.addEventListener("click", () => {
     cancer.addEventListener("click", () => {
         editLayer.remove();
         emailEditor.remove();
+    });
+    emailEditBtn.addEventListener("click", async () => {
+        const newEmail = newEmailInput.value;
+        if (newEmail === email) {
+            editLayer.remove();
+            emailEditor.remove();
+            return;
+        }
+        const password = document.querySelector("#password-input").value;
+        const result = await updateAccountInfo("email", newEmail, password);
+        if (result) {
+            editLayer.remove();
+            emailEditor.remove();
+            email = result.value;
+            updateEmail(result.value);
+        }
     });
 });
 
@@ -144,3 +309,26 @@ profileSetting.addEventListener("click", () => {
     accountPage.style.display = "none";
     profilePage.style.display = "block";
 });
+
+const editInfoBtn = document.querySelector("#edit-info-button");
+editInfoBtn.addEventListener("click", () => {
+    profileSetting.click();
+});
+
+const logoutBtn = document.querySelector("#logout");
+logoutBtn.addEventListener("click", logout);
+
+// Logout
+async function logout() {
+    const options = {
+        method: "DELETE",
+        headers: {
+            "X-CSRFToken": token,
+        },
+    };
+    const response = await fetch(authUrl, options);
+    const data = await response.json();
+    if (data.ok) {
+        location.reload();
+    }
+}
