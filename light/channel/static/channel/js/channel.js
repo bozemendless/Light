@@ -2,6 +2,7 @@ let isSocketConnect = false;
 let peer;
 let userId;
 let username;
+let email;
 let peerId;
 const channelMap = {};
 let currentInChanneL;
@@ -250,10 +251,38 @@ async function getUserData() {
     const data = await response.json();
     userId = data.id;
     username = data.username;
+    email = data.email;
+    updateUsername(username);
+    updateEmail(email);
+}
 
+function updateUsername(newUsername) {
     // Show username in setting zone
     const usernameContainer = document.querySelector(".username-container");
-    usernameContainer.textContent = username;
+    usernameContainer.textContent = newUsername;
+    // Show username in setting page
+    const cardUsername = document.querySelector("#card-username");
+    cardUsername.textContent = newUsername;
+    // Show username in setting page > card background
+    const backgroundUsername = document.querySelector("#background-username");
+    backgroundUsername.textContent = newUsername;
+    // Show username in setting page > card preview
+    const previewUsername = document.querySelector("#preview-username");
+    previewUsername.textContent = newUsername;
+}
+
+function updateChatUsername(oldUsername, newUsername) {
+    const messagesUsernames = document.querySelectorAll(`.${oldUsername}`);
+    messagesUsernames.forEach((username) => {
+        username.textContent = newUsername;
+        username.classList.remove(oldUsername);
+        username.classList.add(newUsername);
+    });
+}
+
+function updateEmail(newEmail) {
+    const backgroundEmail = document.querySelector("#background-email");
+    backgroundEmail.textContent = newEmail;
 }
 
 // Chat Logs
@@ -314,7 +343,7 @@ function createChatLogs(data) {
         messageUserAvatar.className = "message-user-avatar";
         messageContentDiv.className = "message-content-div";
         messageHeader.className = "message-header";
-        messageUser.className = "message-user";
+        messageUser.className = `message-user ${chatLog["username"]}`;
         messageTime.className = "message-time";
         messageContent.className = "message-content";
 
