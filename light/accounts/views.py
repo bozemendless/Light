@@ -199,7 +199,10 @@ def auth(request):
     if request.method == 'DELETE':
         if 'token' in request.session:
             del request.session['token']
-        return redirect('/login')
+        res = {
+            'ok': True
+        }
+        return JsonResponse(res)
 
     # Update
     if request.method == 'PATCH':
