@@ -2,6 +2,8 @@ from .models import Account
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password, check_password
+from django.core.files.storage import default_storage
+from django.conf import settings
 from dotenv import load_dotenv
 from datetime import timedelta
 import datetime
@@ -121,15 +123,17 @@ def auth(request):
                 decode_token = jwt.decode(
                 user_token, jwt_secret_key, algorithms="HS256")
                 decode_user_id = decode_token['id']
-                account_set = Account.objects.filter(id=decode_user_id).values('username', 'email')
+                account_set = Account.objects.filter(id=decode_user_id).values('username', 'email', 'avatar')
                 if account_set:
                     username = account_set[0]['username']
                     email = account_set[0]['email']
+                    avatar = '/media/' + account_set[0]['avatar'] if account_set[0]['avatar'] else None
                 user_id = decode_token['id']
                 res = {
                     'id': user_id,
                     'username': username,
                     'email': email,
+                    'avatar': avatar
                 }
                 return JsonResponse(res)
             except:
@@ -307,6 +311,92 @@ def auth(request):
                     'message': error
                 }
                 return JsonResponse(res, status=500)
+
+        # # token not in session
+        return redirect('/login')
+    
+def avatar(request):
+    if request.method == 'POST':
+        # verify the token
+        if 'token' in request.session:
+            try:
+                user_token = request.session['token']
+                decode_token = jwt.decode(
+                user_token, jwt_secret_key, algorithms="HS256")
+                decode_user_id = decode_token['id']
+            except:
+                del request.session['token']
+                if request.path != '/login':
+                    return redirect('/login')
+
+            # If old avatar, delete old avatar
+            # Store new avatar
+            try:
+                image = request.FILES.get('image')
+
+                updated_user = Account.objects.get(id=decode_user_id)
+                if updated_user.avatar:
+                        old_file_path = settings.MEDIA_ROOT + '/' + str(updated_user.avatar)
+                        default_storage.delete(old_file_path)
+
+                updated_user.avatar = image
+                updated_user.save()
+
+                res = {
+                    'ok': True,
+                    'avatar': updated_user.avatar.url,
+                    }
+
+                print(res)
+
+                return JsonResponse(res)
+
+            except:
+                error = 'Internal Server Error'
+                res = {
+                    'error': True,
+                    'message': error
+                }
+                JsonResponse(res, 500)
+
+        # # token not in session
+        return redirect('/login')
+    
+    if request.method == 'DELETE':
+        # verify the token
+        if 'token' in request.session:
+            try:
+                user_token = request.session['token']
+                decode_token = jwt.decode(
+                user_token, jwt_secret_key, algorithms="HS256")
+                decode_user_id = decode_token['id']
+            except:
+                del request.session['token']
+                if request.path != '/login':
+                    return redirect('/login')
+
+            # If old avatar, delete old avatar
+            try:
+                updated_user = Account.objects.get(id=decode_user_id)
+                if updated_user.avatar:
+                        old_file_path = settings.MEDIA_ROOT + '/' + str(updated_user.avatar)
+                        default_storage.delete(old_file_path)
+                        updated_user.avatar.delete()
+
+                res = {
+                    'ok': True,
+                    'avatar': '/static/channel/imgs/default_avatar-512x512.png'
+                    }
+
+                return JsonResponse(res)
+
+            except:
+                error = 'Internal Server Error'
+                res = {
+                    'error': True,
+                    'message': error
+                }
+                JsonResponse(res, 500)
 
         # # token not in session
         return redirect('/login')

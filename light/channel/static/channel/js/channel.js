@@ -3,7 +3,8 @@ let peer;
 let userId;
 let username;
 let email;
-let peerId;
+let peerId = null;
+let avatar = null;
 const channelMap = {};
 let currentInChanneL;
 let clickedChannel;
@@ -50,6 +51,8 @@ channelList.addEventListener("click", (event) => {
 });
 
 function init() {
+    preload();
+
     switchChannel(); // default is general text channel
 
     // Get user infos
@@ -71,6 +74,16 @@ function init() {
 
     // Default media toggle
     settingMuteSvg.style.display = "inline";
+}
+
+function preload() {
+    const a = setInterval(() => {
+        if (isSocketConnect && isSocketConnect) {
+            const preload = document.getElementById("preload");
+            preload.parentNode.removeChild(preload);
+            clearInterval(a);
+        }
+    }, 1000);
 }
 
 function createMyPeer() {
@@ -252,6 +265,13 @@ async function getUserData() {
     userId = data.id;
     username = data.username;
     email = data.email;
+    avatar = data.avatar;
+    if (!avatar) {
+        updateAvatar("load", avatar);
+    } else {
+        updateAvatar("update", avatar);
+    }
+
     updateUsername(username);
     updateEmail(email);
 }
@@ -283,6 +303,31 @@ function updateChatUsername(oldUsername, newUsername) {
 function updateEmail(newEmail) {
     const backgroundEmail = document.querySelector("#background-email");
     backgroundEmail.textContent = newEmail;
+}
+
+function updateAvatar(type, newAvatar) {
+    let src;
+    if (!newAvatar) {
+        const avatarRemoveBtn = document.querySelector("#avatar-remove-button");
+        avatarRemoveBtn.style.display = "none";
+        src = url;
+    } else {
+        avatarRemoveBtn.style.display = "flex";
+        src = newAvatar;
+    }
+    if (type === "update") {
+        const messagesAvatars = document.querySelectorAll(`.${username}Avatar`);
+        messagesAvatars.forEach((avatar) => {
+            avatar.src = src;
+        });
+    }
+
+    const avatarImg = document.querySelector("#avatar");
+    const settingAvatarImg = document.querySelector("#setting-avatar-img");
+    const previewAvatarImg = document.querySelector("#preview-avatar-img");
+    previewAvatarImg.src = src;
+    avatarImg.src = src;
+    settingAvatarImg.src = src;
 }
 
 // Chat Logs
@@ -340,7 +385,7 @@ function createChatLogs(data) {
         messageContent.appendChild(messageContentTextNode);
 
         messageDiv.className = "message-div";
-        messageUserAvatar.className = "message-user-avatar";
+        messageUserAvatar.className = `message-user-avatar ${chatLog["username"]}Avatar`;
         messageContentDiv.className = "message-content-div";
         messageHeader.className = "message-header";
         messageUser.className = `message-user ${chatLog["username"]}`;
@@ -355,7 +400,11 @@ function createChatLogs(data) {
         }
 
         // Avatar
-        messageUserAvatar.src = url;
+        if (!chatLog["avatar"]) {
+            messageUserAvatar.src = url;
+        } else {
+            messageUserAvatar.src = chatLog["avatar"];
+        }
 
         // Display time
         const chatTime = new Date(chatLog["time"]);

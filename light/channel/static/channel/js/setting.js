@@ -3,6 +3,7 @@ const settingBtn = document.querySelector(".setting-button");
 const settingPage = document.querySelector(".setting-page");
 const exitBtn = document.querySelector(".exit");
 const authUrl = "/api/user/auth";
+const avatarUrl = "/api/user/avatar";
 const token = document.getElementsByName("csrfmiddlewaretoken")[0].value;
 const editLayerHTML = `<div class="edit-layer" id="edit-layer"></div>`;
 const editUsernameHTML = `<div class="editor username-editor" id="username-editor">
@@ -330,5 +331,115 @@ async function logout() {
     const data = await response.json();
     if (data.ok) {
         location.reload();
+    }
+}
+
+// Avatar
+const editAvatarHTML = `
+<div class="editor avatar-editor" id="avatar-editor">
+    <div class="editor-title-wrapper">
+        <div class="editor-title">選擇圖片</div>
+        <div class="editor-close pointer" id="editor-close">
+            <svg class="closeIcon" width="24" height="24" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
+            </svg>
+        </div>
+    </div>
+    <div class="editor-content-wrapper pointer">
+        <div class="editor-avatar-wrapper">
+            <div class="editor-avatar-div">
+                <svg class="uploadIcon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M13.2899 2L6 2C3.79086 2 2 3.79086 2 6V18C2 20.2091 3.79086 22 6 22H18C20.2091 22 22 20.2091 22 18V10.7101C21.3663 10.8987 20.695 11 20 11C16.134 11 13 7.86599 13 4C13 3.30503 13.1013 2.63371 13.2899 2ZM8 6C9.1032 6 10 6.8952 10 8C10 9.1056 9.1032 10 8 10C6.8944 10 6 9.1056 6 8C6 6.8952 6.8944 6 8 6ZM6 18L9 14L11 16L15 11L18 18H6Z" fill="currentColor" />
+                    <path d="M21 0V3H24V5H21V8H19V5H16V3H19V0H21Z" fill="currentColor" />
+                </svg>
+                <div class="avatar-preview-circle">
+                    <img class="avatar-preview-img" id="avatar-preview-img" />
+                </div>
+                <input type="file" id="avatar-input" accept=".jpeg, .jpg, .png"></input>
+            </div>
+            <div class="editor-avatar-title">
+                上傳圖片
+                <span class="error-separator"> - </span>
+                <span class="input-error-message" id="avatar-message"></span>
+            </div>
+        </div>
+    </div>
+    <div class="editor-confirm-wrapper">
+        <div class="editor-cancer-div pointer" id="cancer">
+            <div class="editor-cancer-button">重置</div>
+        </div>
+        <div class="editor-confirm-div pointer" id="avatar-edit-button">
+            <div class="editor-confirm-button">儲存變更</div>
+        </div>
+</div>
+</div>
+`;
+const editAvatarBtn = document.querySelector("#avatar-editor-button");
+
+editAvatarBtn.addEventListener("click", async () => {
+    main.insertAdjacentHTML("beforeend", editLayerHTML + editAvatarHTML);
+    const avatarEditor = document.querySelector("#avatar-editor");
+    const editLayer = document.querySelector("#edit-layer");
+    const editorClose = document.querySelector("#editor-close");
+    editLayer.addEventListener("click", () => {
+        editLayer.remove();
+        avatarEditor.remove();
+    });
+    editorClose.addEventListener("click", () => {
+        editLayer.remove();
+        avatarEditor.remove();
+    });
+
+    const formData = new FormData();
+    const avatarInput = document.querySelector("#avatar-input");
+    const avatarPreviewImg = document.querySelector("#avatar-preview-img");
+    avatarInput.addEventListener("change", (event) => {
+        URL.revokeObjectURL(avatarPreviewImg.src);
+        const file = event.target.files[0];
+        if (file.size > 10 * 1024 * 1024) {
+            alert("圖片大小不能超過 10 MB");
+            return;
+        }
+        formData.append("image", file);
+        avatarPreviewImg.src = URL.createObjectURL(file);
+        avatarPreviewImg.style.display = "block";
+    });
+
+    const avatarSubmitBtn = document.querySelector("#avatar-edit-button");
+    avatarSubmitBtn.addEventListener("click", async () => {
+        const options = {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": token,
+            },
+            body: formData,
+        };
+
+        const response = await fetch(avatarUrl, options);
+        const data = await response.json();
+        if (response.ok) {
+            avatar = data.avatar;
+            updateAvatar("update", avatar);
+            editLayer.remove();
+            avatarEditor.remove();
+        }
+    });
+});
+
+const avatarRemoveBtn = document.querySelector("#avatar-remove-button");
+avatarRemoveBtn.addEventListener("click", removeAvatar);
+
+async function removeAvatar() {
+    const options = {
+        method: "DELETE",
+        headers: {
+            "X-CSRFToken": token,
+        },
+    };
+    const response = await fetch(avatarUrl, options);
+    const data = await response.json();
+    if (response.ok) {
+        avatar = null;
+        updateAvatar("update", avatar);
     }
 }

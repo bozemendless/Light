@@ -221,6 +221,7 @@ input:autofill { box-shadow: inset 0 0 0 2000px #e8f0fe; }
     height: 100%;
     object-fit: fill;
     border-radius: 50%;
+    background-color: #000;
 }
 
 .user-info-region>.username {
@@ -567,6 +568,10 @@ input:autofill { box-shadow: inset 0 0 0 2000px #e8f0fe; }
     border-bottom: 1px solid rgba(78,80,88,0.48);
 }
 
+.avatar-editor-buttons-wrapper {
+    display: flex;
+}
+
 .avatar-editor-button {
     display: flex;
     width: 88px;
@@ -586,6 +591,27 @@ input:autofill { box-shadow: inset 0 0 0 2000px #e8f0fe; }
     font-size: 14px;
     font-weight: 500;
     line-height: 16px;
+}
+
+.avatar-remove-button {
+    width: 88px;
+    height: 32px;
+    padding: 2px 16px;
+    margin-left: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-remove-button:hover {
+    text-decoration: underline;
+}
+
+.avatar-remove-button>.remove-editor {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 16px;
+    color: #FFF;
 }
 
 .aboutme-customization-session {
@@ -649,6 +675,7 @@ input:autofill { box-shadow: inset 0 0 0 2000px #e8f0fe; }
     height: 100%;
     object-fit: fill;
     border-radius: 50%;
+    background-color: #000;
 }
 
 .preview-user-background {
@@ -698,4 +725,104 @@ input:autofill { box-shadow: inset 0 0 0 2000px #e8f0fe; }
     word-wrap: break-word;
     white-space: pre-wrap;
     user-select: text;
+}
+
+/* Avatar */
+
+#avatar-editor {
+    width: 300px;
+    height: 330px;
+}
+
+#avatar-editor>.editor-title-wrapper {
+    display: flex;
+    padding: 16px 16px 16px 20px;
+    width: 64px;
+    height: auto;
+}
+
+#avatar-editor>.editor-title-wrapper>.editor-title {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 24px;
+    margin-bottom: 8px;
+    color: #F3F4F5;
+}
+
+#avatar-editor>.editor-content-wrapper {
+    height: 196px;
+    background-color: #232428;
+    border-radius: 5px;
+    padding: 0;
+    margin: 0 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
+    position: relative;
+    color: #B8B9BF;
+    transition: color .2s ease-in-out;
+}
+
+#avatar-editor>.editor-content-wrapper:hover {
+    color: #F3F4F5;
+}
+
+.editor-content-wrapper>.editor-avatar-wrapper>.editor-avatar-div>.avatar-preview-circle {
+    border-radius: 50%;
+    background-color: #5865F2;
+    width: 128px;
+    height: 128px;
+    cursor: pointer;
+}
+
+.avatar-preview-circle>.avatar-preview-img {
+    display: none;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    border-radius: 50%;
+    background-color: #000;
+}
+
+.editor-content-wrapper>.editor-avatar-wrapper>.editor-avatar-div>input {
+    position: absolute;
+    width: 268px;
+    height: 196px;
+    left: 0;
+    top: 0;
+    border-radius: 5px;
+    cursor: pointer;
+    opacity: 0;
+}
+
+.editor-content-wrapper>.editor-avatar-wrapper>.editor-avatar-div>.uploadIcon {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#avatar-editor>.editor-content-wrapper>.editor-avatar-wrapper {
+    color: inherit;
+}
+
+#avatar-editor>.editor-content-wrapper>.editor-avatar-wrapper>.editor-avatar-title {
+    font-size: 14px;
+    color: inherit;
+    line-height: 20px;
+    text-align: center;
+    margin-top: 16px;
+}
+
+.avatar-editor>.editor-confirm-wrapper>.editor-cancer-div>.editor-cancer-button {
+    color: #E0E1E5;
+}
+
+#avatar-edit-button {
+    background-color: #248045;
+}
+
+#avatar-edit-button:hover {
+    background-color: #1a6334;
 }

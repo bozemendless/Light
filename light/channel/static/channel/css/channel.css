@@ -257,7 +257,6 @@ main {
     margin: 3px 8px;
     background-color: #fff;
     border-radius: 50%;
-    /* background-image: url("/light/channel/static/channel/imgs/default_avatar-32x32.png"); */
 }
 
 .voice-username {
@@ -302,6 +301,10 @@ main {
 
 .avatar > img {
     border-radius: 50%;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    background-color: #000;
 }
 
 .name-tag {
@@ -403,6 +406,7 @@ path {
     width: 40px;
     margin-top: 2px;
     border-radius: 50%;
+    background-color: #000;
 }
 
 .message-content-div {
@@ -422,7 +426,7 @@ path {
     font-weight: 500;
     margin-right: 4px;
     line-height: 22px;
-    user-select: text;
+    /* user-select: text; */
 }
 
 .message-time {
@@ -635,4 +639,22 @@ video:hover {
     color: #d3d4d5;
     border-radius: 10px;
     font-weight: 400;
+}
+
+#preload {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100%;
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#preload > img {
+    object-fit: contain;
+    height: 33vw;
+    /* width: 100%; */
 }
