@@ -17,4 +17,8 @@ class Account(models.Model):
         max_length=88,
         db_index=True,
         )
+    avatar = models.ImageField(
+        upload_to='account/avatar/',
+        default=None,
+        )
     create_time = models.DateTimeField(default=timezone.now)
