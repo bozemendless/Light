@@ -13,10 +13,11 @@ def get_chat_logs(request):
             'data':[
                 {
                     'id': str(chat_log.id),
-                    'message':chat_log.content, 
-                    'username':chat_log.account.username,
-                    'image':str(chat_log.image), 
-                    'time':str(chat_log.create_time)
+                    'message' :chat_log.content, 
+                    'username' :chat_log.account.username,
+                    'avatar': chat_log.account.avatar.url if chat_log.account.avatar else'',
+                    'image': str(chat_log.image), 
+                    'time': str(chat_log.create_time)
                 }
                 for chat_log in chat_logs
             ] 
