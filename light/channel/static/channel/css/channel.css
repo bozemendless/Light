@@ -718,7 +718,7 @@ video:hover {
     overflow: hidden;
     color: #e0e1e5;
     transition: background-color .15s ease-out, color .15s ease-out;
-    cursor: not-allowed;
+    cursor: pointer;
 }
 
 /* .pill:hover {

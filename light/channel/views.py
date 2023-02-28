@@ -16,12 +16,46 @@ def channel(request):
     return render(request, 'channel/channel.html')
 
 def server(request):
+    # Get server list
     if request.method == 'GET':
-        pass
+        # verify the token
+        if 'token' in request.session:
+            try: # get user id
+                user_token = request.session['token']
+                decode_token = jwt.decode(
+                user_token, jwt_secret_key, algorithms="HS256")
+                decode_user_id = decode_token['id']
+            except:
+                del request.session['token']
+                if request.path != '/login':
+                    return redirect('/login')
+            # try: # get user server list
+            account = Account.objects.get(id=decode_user_id)
+            servers = account.joined_groups.all()
+            res = {
+                'data':[
+                    {
+                        'id': str(server.id),
+                        'name': server.name, 
+                        'creator': server.creator.username,
+                        'members': [member.username for member in server.members.all()],
+                    }
+                    for server in servers
+                ] 
+            }
+            print(res)
+            return JsonResponse(res)
+            # except:
+            #     pass
+    else: 
+            # token not in session
+            return redirect('/login')
+
+    # Create server
     if request.method == 'POST':
         # verify the token
         if 'token' in request.session:
-            try:
+            try: # get user id
                 user_token = request.session['token']
                 decode_token = jwt.decode(
                 user_token, jwt_secret_key, algorithms="HS256")
@@ -38,9 +72,15 @@ def server(request):
                 server = Server(name=name, creator=account)
                 server.save()
                 server.members.add(account)
-                print(server)
                 res = {
-                    'ok': True,
+                    'data':[
+                        {
+                            'id': str(server.id),
+                            'name': server.name,
+                            'creator': server.creator.username,
+                            'members': [member.username for member in server.members.all()],
+                        }
+                    ]
                 }
                 return JsonResponse(res)
 

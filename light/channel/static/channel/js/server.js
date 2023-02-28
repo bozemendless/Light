@@ -3,10 +3,9 @@ serverInit();
 
 // Load server list
 async function serverInit() {
-    return;
     const response = await fetch(serverAPIUrl);
     const data = await response.json();
-    console.log(data);
+    loadingServerList(data.data);
 }
 
 // Create server
@@ -63,7 +62,7 @@ createServerBtn.addEventListener("click", () => {
         } else createServerSubmitBtn.classList.remove("forbidden");
     });
     createServerSubmitBtn.addEventListener("click", () => {
-        const regex = /^[a-zA-Z0-9\u4e00-\u9fa5]{2,72}$/;
+        const regex = /^[a-zA-Z0-9\u4e00-\u9fa5]{2,100}$/;
         if (regex.test(createServerInput.value)) {
             createServer(createServerInput.value);
             return;
@@ -87,7 +86,8 @@ createServerBtn.addEventListener("click", () => {
         const response = await fetch(serverAPIUrl, options);
         const data = await response.json();
         if (response.ok) {
-            createServerWrapper(name);
+            console.log(data.data);
+            loadingServerList(data.data);
             editLayer.remove();
             createServerWrapper.remove();
             return;
@@ -95,13 +95,15 @@ createServerBtn.addEventListener("click", () => {
     }
 });
 
-function createServerWrapper(name) {
-    const serverWrapperHTML = `
-    <div class="server-wrapper">
-        <div class="server">${name}</div>
-        <div class="pill"></div>
-    </div>
-    `;
+function loadingServerList(servers) {
     const serverArea = document.querySelector("#server-list");
-    serverArea.insertAdjacentHTML("beforeend", serverWrapperHTML);
+    servers.forEach((server) => {
+        const serverWrapperHTML = `
+        <div class="server-wrapper">
+            <div class="server">${server.name}</div>
+            <div class="pill"></div>
+        </div>
+        `;
+        serverArea.insertAdjacentHTML("beforeend", serverWrapperHTML);
+    });
 }
