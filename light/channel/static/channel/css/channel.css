@@ -450,6 +450,26 @@ path {
     word-wrap: break-word;
 }
 
+#chatInput {
+    /* margin-top: 17px; */
+    padding: 0 16px;
+    margin-bottom: 24px;
+}
+
+#message-input {
+    width: 100%;
+    height: auto;
+    min-height: 50px;
+    display: block;
+    background-color: #40444b;
+    font-size: 16px;
+    /* padding-top: 14px; */
+    padding-left: 20px;
+    color: #d3d4d5;
+    border-radius: 10px;
+    font-weight: 400;
+}
+
 /* .same-user-texting {
     margin-top: 0;
     height: auto
@@ -624,25 +644,7 @@ video:hover {
     cursor: not-allowed;
 }
 
-#chatInput {
-    /* margin-top: 17px; */
-    padding: 0 16px;
-    margin-bottom: 24px;
-}
-
-#message-input {
-    width: 100%;
-    height: auto;
-    min-height: 50px;
-    display: block;
-    background-color: #40444b;
-    font-size: 16px;
-    /* padding-top: 14px; */
-    padding-left: 20px;
-    color: #d3d4d5;
-    border-radius: 10px;
-    font-weight: 400;
-}
+/* Preload */
 
 #preload {
     position: absolute;
@@ -661,6 +663,8 @@ video:hover {
     height: 33vw;
     /* width: 100%; */
 }
+
+/* Light scrollbar */
 
 .light-scrollbar {
     background-color: #1e1f22;
@@ -769,7 +773,6 @@ video:hover {
     align-items: center;
     fill: #23a55a;
     transition: background-color .15s ease-out;
-    cursor: not-allowed;
 }
 
 .create-server:hover {
@@ -784,4 +787,130 @@ video:hover {
 
 .create-server > svg > path {
     fill: inherit;
+}
+
+/* Create server */
+
+.create-server-wrapper {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 440px;
+    height: 400px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: rgba(199, 200, 206, 0.298) 0px 0px 0px 1px;
+}
+
+.create-server-wrapper>.create-server-title-div {
+    position: relative;
+    height: 102px;
+    padding: 24px 24px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.create-server-title-div>.editor-close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+}
+
+.create-server-title-div>.create-server-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: #060607;
+    line-height: 30px;
+}
+
+.create-server-title-div>.create-server-slogan {
+    margin-top: 8px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    color: #4e5058;
+}
+
+.create-server-wrapper>.create-server-name-div {
+    height: 160px;
+    margin: 30px 0;
+    padding: 30px 16px 0;
+}
+
+.create-server-name-div>.create-server-error {
+    margin-bottom: 8px;
+}
+
+.create-server-error>.create-server-error-message {
+    color: #a12829;
+    letter-spacing: 0.24px;
+    font-weight: 700;
+    font-size: 12px;
+    font-style: italic;
+}
+
+.create-server-name-div>.create-server-name-title {
+    color: #4e5058;
+    letter-spacing: 0.24px;
+    font-weight: 700;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.create-server-name-div>.create-server-input-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.create-server-input-wrapper>.create-server-input {
+    padding: 10px;
+    height: 40px;
+    font-size: 16px;
+    width: 100%;
+    border-radius: 3px;
+    background-color: #e9eaed;
+    color: #313338;
+}
+
+.create-server-wrapper>.create-server-submit-div {
+    height: 78px;
+    padding: 16px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    background-color: #f3f4f5;
+    border-radius: 0 0 5px 5px;
+}
+
+.create-server-submit-div>.create-server-submit-button {
+    height: 38px;
+    width: 96px;
+    padding: 2px 16px;
+    background-color: #5865F2;
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color .15s ease-out, color .15s ease-out;
+}
+
+.create-server-submit-div>.create-server-submit-button:hover {
+    background-color: #4752c4;
+}
+
+.create-server-submit-div>.forbidden, .create-server-submit-div>.forbidden:hover{
+    background-color: #a6acf4;
+    cursor: not-allowed;
+}
+
+.create-server-submit-button>.create-server-submit-text {
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 16px;
+    margin: 0 18px;
+    color: #FFF;
 }
