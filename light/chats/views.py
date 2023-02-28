@@ -35,9 +35,10 @@ def save_chat_logs(**log):
     # print('a chat record insert')
 
     data = {
-        'username': chat.account.username,
-        'message': chat.content,
+        # 'username': chat.account.username,
+        # 'message': chat.content,
         'time': str(chat.create_time),
+        'avatar': chat.account.avatar.url if chat.account.avatar else None,
     }
 
     return data

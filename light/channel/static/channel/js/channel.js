@@ -1,4 +1,5 @@
 let isSocketConnect = false;
+let isChatLogLoading = false;
 let peer;
 let userId;
 let username;
@@ -63,6 +64,7 @@ function init() {
         .then((chatLogs) => {
             // Show chat logs
             createChatLogs(chatLogs);
+            isChatLogLoading = true;
         })
         .then(() => {
             messageList.scrollTop = messageList.scrollHeight;
@@ -78,7 +80,7 @@ function init() {
 
 function preload() {
     const a = setInterval(() => {
-        if (isSocketConnect && isSocketConnect) {
+        if (isSocketConnect && isSocketConnect && isChatLogLoading) {
             const preload = document.getElementById("preload");
             preload.parentNode.removeChild(preload);
             clearInterval(a);
@@ -461,7 +463,11 @@ function webSocketConnect() {
         // Listen to chat message
         if (parsedData.type === "message") {
             const arr = [parsedData.data];
-            createChatLogs(arr);
+            if (arr[0]["username"] === username) {
+                return;
+            } else {
+                createChatLogs(arr);
+            }
         }
 
         // Listen to notifications
@@ -539,8 +545,19 @@ function sendMessage(message) {
     const sendData = {
         action: "message",
         id: userId,
+        username: username,
         message: message,
     };
+    const today = new Date();
+    const arr = [
+        {
+            avatar: avatar,
+            message: message,
+            username: username,
+            time: today,
+        },
+    ];
+    createChatLogs(arr);
     webSocket.send(JSON.stringify(sendData));
 }
 // Stream

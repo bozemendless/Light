@@ -38,6 +38,8 @@ html, body {
     height: 100%;
     width: 100%;
     overflow-y: hidden;
+    /* overflow-x: hidden; */
+    max-width: 100vw;
 }
 
 ::-webkit-scrollbar {
@@ -139,12 +141,12 @@ textarea {
 /* ====== */
 
 main {
-    width: calc(100% - 240px);
+    flex-grow: 1;
     height: 100%;
 }
 
 .main-container {
-    width: 100%;
+    max-width: calc(100vw - 240px - 72px);
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -381,7 +383,7 @@ path {
 }
 
 .message-list {
-    width: calc(100% - 3px);
+    max-width: calc(100vw - 72px - 240px);
     user-select: text;
     flex-grow: 1;
     overflow-y: auto;
@@ -444,7 +446,8 @@ path {
     font-weight: 400;
     line-height: 22px;
     user-select: text;
-    white-space: pre;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 /* .same-user-texting {
@@ -657,4 +660,128 @@ video:hover {
     object-fit: contain;
     height: 33vw;
     /* width: 100%; */
+}
+
+.light-scrollbar {
+    background-color: #1e1f22;
+    min-width: 72px;
+    padding-top: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.light-scrollbar>.my-area {
+    height: 48px;
+    margin-bottom: 8px;
+    width: 100%;
+}
+
+.light-scrollbar>.server-separator {
+    width: 32px;
+    height: 1px;
+    border-radius: 1px;
+    background-color: #35363c;
+    margin-bottom: 8px;
+}
+
+.light-scrollbar>.server-area {
+    width: 100%;
+}
+
+.server-wrapper {
+    position: relative;
+    width: 100%;
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.server {
+    height: 48px;
+    width: 48px;
+    border-radius: 50%;
+    background-color: #313338;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    fill: #e0e1e5;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    overflow: hidden;
+    color: #e0e1e5;
+    transition: background-color .15s ease-out, color .15s ease-out;
+    cursor: not-allowed;
+}
+
+/* .pill:hover {
+    position: absolute;
+    height: 40px;
+    width: 8px;
+    left: -4px;
+    top: 50%;
+    transform: translate(0, -50%);
+    background-color: #fff;
+    border-radius: 4px;
+} */
+
+.pill-active {
+    position: absolute;
+    height: 40px;
+    width: 8px;
+    left: -4px;
+    top: 50%;
+    transform: translate(0, -50%);
+    background-color: #fff;
+    border-radius: 4px;
+}
+
+.server:hover, .server-active {
+    background-color: #5865f2;
+    border-radius: 18px;
+    fill: #FFF;
+    color: #FFF;
+}
+
+.server-active{
+    cursor: pointer;
+}
+
+.server > svg {
+    fill: inherit;
+}
+
+.server > svg > path {
+    fill: inherit;
+}
+
+.create-server {
+    height: 48px;
+    width: 48px;
+    border-radius: 50%;
+    margin-bottom: 8px;
+    background-color: #313338;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    fill: #23a55a;
+    transition: background-color .15s ease-out;
+    cursor: not-allowed;
+}
+
+.create-server:hover {
+    background-color: #23a55a;
+    border-radius: 18px;
+    fill: #FFF;
+}
+
+.create-server > svg {
+    fill: inherit;
+}
+
+.create-server > svg > path {
+    fill: inherit;
 }

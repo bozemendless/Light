@@ -88,7 +88,10 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             try:
                 message = receive_data['message']
                 user_id = receive_data['id']
+                username = receive_data['username']
                 data = await save_chat_logs(message=message, action=action, user_id=user_id)
+                data['username'] = username
+                data['message'] = message
 
                 await self.channel_layer.group_send(
                     self.room_group_name,
