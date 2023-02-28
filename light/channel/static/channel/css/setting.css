@@ -826,3 +826,34 @@ input:autofill { box-shadow: inset 0 0 0 2000px #e8f0fe; }
 #avatar-edit-button:hover {
     background-color: #1a6334;
 }
+
+.avatar-editor > .editor-confirm-wrapper > .editor-cancer-div {
+    visibility: hidden;
+}
+
+.aboutme-customization-session > .editor-confirm-div {
+    height: 70px;
+    padding: 16px;
+}
+
+#aboutme-edit-button {
+    width: 96px;
+    height: 38px;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 2px 16px;
+    background-color: #248045;
+    margin-top: 25px;
+    margin-left: 148px;
+    border-radius: 2px;
+}
+#aboutme-edit-button:hover {
+    background-color: #1a6334;
+}
+
+#aboutme-edit-button>.editor-confirm-button {
+    font-size: 14px;
+    font-weight: 500;
+    color: #FFF;
+}

@@ -443,3 +443,15 @@ async function removeAvatar() {
         updateAvatar("update", avatar);
     }
 }
+
+// About me
+const aboutMe = document.querySelector("#aboutme");
+const aboutMePreview = document.querySelector(".preview-aboutme-content");
+aboutMe.addEventListener("input", () => {
+    aboutMePreview.textContent = aboutMe.value;
+});
+
+aboutMe.addEventListener("change", () => {
+    const aboutMeEditBtn = document.querySelector("#aboutme-edit-button");
+    aboutMeEditBtn.style.display = "flex";
+});
