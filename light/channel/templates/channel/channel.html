@@ -12,12 +12,42 @@
 </head>
 <body>
     <div class="container">
+        <div class="light-scrollbar">
+            <div class="my-area">
+                <div class="server-wrapper">
+                    <div class="server" id="me-server">
+                        <svg width="30" height="42" viewBox="0 0 61 51">
+                        <path d="M12.52 2.472C12.568 2.328 12.592 2.208 12.592 2.112C12.64 1.968 12.688 1.848 12.736 1.752H4.816C4.912 1.608 5.008 1.488 5.104 1.392C5.2 1.248 5.296 1.128 5.392 1.032H13.744C14.128 0.743998 14.536 0.599997 14.968 0.599997H29.368C29.896 0.599997 30.304 0.743998 30.592 1.032H22.24C22.336 1.128 22.432 1.248 22.528 1.392C22.672 1.488 22.768 1.608 22.816 1.752H30.664C30.76 2.04 30.808 2.28 30.808 2.472H34.84C34.888 2.472 34.912 2.496 34.912 2.544V3.192H25.192V4.632H29.224V5.712H28.792V7.152H26.2V8.592H32.032V8.952H32.464V10.392H32.752V11.832H32.248V13.272H31.888V15.072H33.112V16.512H31.744V17.952H32.032V18.312H37.144V19.752H39.808V20.472H28.72V21.192H32.392V22.632H29.368V24.072H31.96V24.792H32.464V25.872H42.112V26.592H48.808V28.032H30.52V26.592H23.824V25.872H14.176V24.792H13.672V24.072H11.08V22.632H14.104V21.192H10.432V20.472H21.52V19.752H18.856V18.312H13.744V17.952H13.456V16.512H14.824V15.072H13.6V13.272H13.96V11.832H14.464V10.392H14.176V8.952H13.744V8.592H7.912V7.152H10.504V5.712H10.936V4.632H6.904V3.192H16.624V2.472H12.52ZM60.4 41.352H40.744V41.712H42.184V42.792H52.408V43.152H49.24V44.592H54.28V45.672H55V46.032H54.496V46.392H54.28V47.832H54.424V48.912H54.136V49.272H53.776C53.728 49.368 53.704 49.488 53.704 49.632H54.496C54.352 50.112 54.088 50.472 53.704 50.712H52.912C52.672 50.904 52.336 51 51.904 51H15.616C15.184 51 14.848 50.904 14.608 50.712H15.328C14.896 50.472 14.608 50.112 14.464 49.632H13.672C13.672 49.536 13.648 49.464 13.6 49.416C13.6 49.368 13.6 49.32 13.6 49.272H13.96V48.912H14.248V47.832H14.104V46.392H14.32V46.032H14.824V45.672H14.104V44.592H9.064V43.152H12.232V42.792H2.008V41.712H0.567999V41.352H20.224V40.272H12.232V39.192H20.008V38.832H3.016V37.752H5.464V37.392H14.824V37.032H11.512V35.952H17.128V34.512H11.44V33.792H16.12V33.432H13.96V32.352H16.048V31.632H13.384V30.912H19.648V29.832H21.448V29.112H11.584V28.032H29.872V29.112H39.736V29.832H37.936V30.912H31.672V31.632H34.336V32.352H32.248V33.432H34.408V33.792H29.728V34.512H35.416V35.952H29.8V36.24H49.744C50.416 36.24 50.944 36.504 51.328 37.032H54.64L54.856 37.392H45.496L45.64 37.752H43.12C43.168 37.848 43.192 37.992 43.192 38.184V38.832H60.184V39.192H52.408V40.272H60.4V41.352Z" fill="black" />
+                        </svg>
+                    </div>
+                    <div class="pill"></div>
+                </div>
+            </div>
+            <div class="server-separator"></div>
+            <div class="server-area" id="server-list">
+                <div class="server-wrapper">
+                    <div class="server server-active">
+                        Light
+                    </div>
+                    <div class="pill pill-active"></div>
+                </div>
+            </div>
+            <div class="server-area">
+                <div class="server-wrapper">
+                    <div class="create-server pointer" id="create-server">
+                        <svg class="circleIcon-3489FI" width="24" height="24" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M20 11.1111H12.8889V4H11.1111V11.1111H4V12.8889H11.1111V20H12.8889V12.8889H20V11.1111Z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="sidebar">
             <div class="searchBar">
             </div>
             <div class="channel-list">
                 <div class="channel-name">
-                Light_channel
+                Light
                 </div>
                 <div class="text-channel channel-type">
                     <div class="text-channel-label channel-label pointer">
@@ -267,7 +297,10 @@
                                     <div class="customization-session aboutme-customization-session">
                                         <div class="h3-title">關於我</div>
                                         <div class="aboutme-wrapper">
-                                            <textarea id="aboutme" cols="30" rows="5"></textarea>
+                                            <textarea id="aboutme" cols="30" rows="5" maxlength="100"></textarea>
+                                        </div>
+                                        <div class="editor-confirm-div pointer" id="aboutme-edit-button">
+                                            <div class="editor-confirm-button">儲存變更</div>
                                         </div>
                                     </div>
                                     
@@ -319,6 +352,7 @@
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <script src="{% static 'channel/js/channel.js' %}"></script>
     <script src="{% static 'channel/js/setting.js' %}"></script>
+    <script src="{% static 'channel/js/server.js' %}"></script>
 
 </body>
 </html>
