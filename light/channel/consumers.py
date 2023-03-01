@@ -8,7 +8,7 @@ general_voice_channel_list = []
 class ChannelConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
-        self.room_group_name = 'Test-Room' # for now, we only have one channel
+        self.room_group_name = 'Light' # public server
 
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -17,7 +17,7 @@ class ChannelConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         # send current online member
-        if not general_voice_channel_list:
+        if general_voice_channel_list:
             data = {
                 'action': 'channel_list',
                 'general_voice_channel': general_voice_channel_list
@@ -49,10 +49,13 @@ class ChannelConsumer(AsyncWebsocketConsumer):
         for user in general_voice_channel_list:
             if user['peer_channel_name'] == self.channel_name:
 
+                print(user)
+
                 data = {
                     'action': 'leave_room',
                     'peer_username': user['peer_username'],
-                    'peer_channel_name': user['peer_channel_name']
+                    'peer_channel_name': user['peer_channel_name'],
+                    'peer_server_id': user['peer_server_id'],
                     # 'peer_nickname': user['peer_nickname'],
                 }
 
@@ -65,7 +68,7 @@ class ChannelConsumer(AsyncWebsocketConsumer):
                             'data': data
                         }
                     )
-
+                return
 
 
         await self.channel_layer.group_discard(
@@ -89,9 +92,11 @@ class ChannelConsumer(AsyncWebsocketConsumer):
                 message = receive_data['message']
                 user_id = receive_data['id']
                 username = receive_data['username']
-                data = await save_chat_logs(message=message, action=action, user_id=user_id)
+                server_id = receive_data['serverId']
+                data = await save_chat_logs(message=message, action=action, user_id=user_id, server_id=server_id)
                 data['username'] = username
                 data['message'] = message
+                data['server'] = server_id
 
                 await self.channel_layer.group_send(
                     self.room_group_name,
@@ -110,6 +115,7 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             peer_id = receive_data['peerId']
             user_id = receive_data['id']
             peer_username = receive_data['username']
+            peer_server_id = receive_data['server']
             # peer_nickname = receive_data['nickname']
             peer_channel_name = self.channel_name
 
@@ -120,6 +126,7 @@ class ChannelConsumer(AsyncWebsocketConsumer):
                 'peer_id': peer_id,
                 'peer_username': peer_username,
                 'peer_channel_name': peer_channel_name,
+                'peer_server_id': peer_server_id,
                 # 'peer_nick_name': peer_nickname,
             }
 
@@ -135,6 +142,7 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             channel_member = {
                 'peer_channel_name': peer_channel_name,
                 'peer_username': peer_username,
+                'peer_server_id': peer_server_id,
                 # 'peer_nickname': peer_username,
             }
             general_voice_channel_list.append(channel_member)
@@ -146,6 +154,7 @@ class ChannelConsumer(AsyncWebsocketConsumer):
                 'action': 'join_room',
                 'peer_username': peer_username,
                 'peer_channel_name': peer_channel_name,
+                'peer_server_id': peer_server_id,
                 # 'peer_nickname': nickname,
             }
 
