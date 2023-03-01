@@ -4,11 +4,13 @@ from django.http import JsonResponse
 from accounts.views import check_login
 from accounts.models import Account
 from channels.db import database_sync_to_async
+from channel.models import Server
 
 @check_login
-def get_chat_logs(request):
-    chat_logs = Chat.objects.all()
-    # print('number of logs',len(chat_logs))
+def chat(request):
+    server_id = request.GET.get('server_id')
+    chat_logs = Chat.objects.filter(server=server_id)
+
     res = {
             'data':[
                 {
@@ -17,7 +19,8 @@ def get_chat_logs(request):
                     'username' :chat_log.account.username,
                     'avatar': chat_log.account.avatar.url if chat_log.account.avatar else'',
                     'image': str(chat_log.image), 
-                    'time': str(chat_log.create_time)
+                    'time': str(chat_log.create_time),
+                    'server': server_id
                 }
                 for chat_log in chat_logs
             ] 
@@ -26,10 +29,12 @@ def get_chat_logs(request):
 
 @database_sync_to_async
 def save_chat_logs(**log):
+    server = Server.objects.get(id=log['server_id'])
     chat = Chat()
     account = Account.objects.get(id=log['user_id'])
     chat.account = account
     chat.content = log['message']
+    chat.server = server
     
     chat.save()
     # print('a chat record insert')
