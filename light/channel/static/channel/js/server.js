@@ -1,15 +1,128 @@
 const serverAPIUrl = "api/server";
-serverInit();
+const serverArea = document.querySelector("#server-list");
+const serverLoadingStatus = {};
+const createServerBtn = document.querySelector("#create-server");
 
 // Load server list
 async function serverInit() {
     const response = await fetch(serverAPIUrl);
     const data = await response.json();
-    loadingServerList(data.data);
+    await loadingServerList(data.data);
+    switchServer();
+    await serverArea.firstElementChild.firstElementChild.click();
+    defaultServerLoading = true;
 }
 
-// Create server
-const createServerBtn = document.querySelector("#create-server");
+async function loadingServerList(servers) {
+    const voiceChannelDiv = document.querySelector(".voice-channel");
+    servers.forEach((server) => {
+        const serverWrapperHTML = `
+        <div class="server-wrapper">
+            <div class="server" id="server-${server.id}" data-server-id="server-${server.id}" data-server-name="${server.name}">${server.name}</div>
+            <div class="pill"></div>
+        </div>
+        `;
+        serverArea.insertAdjacentHTML("beforeend", serverWrapperHTML);
+        serverLoadingStatus[server.id] = false;
+
+        // voice channel list
+        const voiceUserWrappersWrapperHTML = `
+        <div class="voice-user-wrappers-wrapper" id="voice-channel-server-wrapper-${server.id}" style="display: none;"></div>
+        `;
+        voiceChannelDiv.insertAdjacentHTML(
+            "beforeend",
+            voiceUserWrappersWrapperHTML
+        );
+        const wrappersWrapper = document.querySelector(
+            `#voice-channel-server-wrapper-${server.id}`
+        );
+        voiceChannelWrappersWrapperArray.push({
+            id: server.id,
+            wrapper: wrappersWrapper,
+        });
+    });
+}
+
+// Switch server
+function switchServer() {
+    serverArea.addEventListener("click", async (event) => {
+        if (event.target.classList.contains("server-active")) {
+            return;
+        }
+        if (event.target.classList.contains("server")) {
+            // Get click serverId
+            const serverId = event.target
+                .getAttribute("data-server-id")
+                .split("-")[1];
+            const serverName = event.target.getAttribute("data-server-name");
+            currentServerId = serverId;
+            currentServerName = serverName;
+
+            // active view switch
+            const activeServer = document.querySelector(".server-active");
+            if (activeServer) {
+                activeServer.classList.remove("server-active");
+                event.target.classList.add("server-active");
+            } else {
+                event.target.classList.add("server-active");
+            }
+
+            // switch sidebar channel name
+            const channelName = document.querySelector("#channel-name");
+            channelName.textContent = event.target.textContent;
+
+            //  check if first time loading this server
+            // have ever loaded
+            if (serverLoadingStatus[currentServerId]) {
+                console.log("載入過了");
+
+                // first time load
+            } else {
+                // create ul
+                const ulHTML = `
+                <ul class="message-list" id="message-list-${currentServerId}"></ul>
+                `;
+                const messagesUlWrapper = document.querySelector("#messages");
+                messagesUlWrapper.insertAdjacentHTML("beforeend", ulHTML);
+                const currentUl = document.querySelector(
+                    `#message-list-${currentServerId}`
+                );
+                uls.push({ id: serverId, ul: currentUl });
+
+                // load chat logs
+                const logs = await getChatLogs(currentServerId);
+                createChatLogs(logs);
+                serverLoadingStatus[currentServerId] = true;
+                currentUl.scrollTop = currentUl.scrollHeight;
+            }
+
+            // switch ul(message-list) view
+            const messageLists = document.querySelectorAll(".message-list");
+            messageLists.forEach((list) => {
+                list.style.display = "none";
+            });
+            const ulObject = uls.find((ul) => ul.id === serverId);
+            ulObject.ul.style.display = "block";
+
+            messageInput.placeholder = `傳送訊息到 ${currentServerName}`;
+            messageInput.value = "";
+            // switch voice channel wrappers wrapper
+            // const wrapper = voiceChannelWrappersWrapperArray.find(
+            //     (wrapper) => wrapper.id === serverId
+            // ).wrapper;
+            // wrapper.style.display = "block";
+            voiceChannelWrappersWrapperArray.forEach((wrapper) => {
+                if (wrapper.id === serverId) {
+                    wrapper.wrapper.style.display = "block";
+                } else {
+                    wrapper.wrapper.style.display = "none";
+                }
+            });
+        }
+    });
+}
+
+// Create server button
 createServerBtn.addEventListener("click", () => {
     const createServerHTML = `
     <div class="create-server-wrapper" id="create-server-wrapper">
@@ -62,9 +175,9 @@ createServerBtn.addEventListener("click", () => {
         } else createServerSubmitBtn.classList.remove("forbidden");
     });
     createServerSubmitBtn.addEventListener("click", () => {
-        const regex = /^[a-zA-Z0-9\u4e00-\u9fa5]{2,100}$/;
+        const regex = /^[a-zA-Z0-9\u4e00-\u9fa5 ]{2,100}$/;
         if (regex.test(createServerInput.value)) {
-            createServer(createServerInput.value);
+            createServer(createServerInput.value.trim());
             return;
         } else {
             alert("必須為長度在 2 和 100 之間的中、英文或數字的任意組合");
@@ -83,6 +196,7 @@ createServerBtn.addEventListener("click", () => {
             },
             body: JSON.stringify(info),
         };
+        console.log(options);
         const response = await fetch(serverAPIUrl, options);
         const data = await response.json();
         if (response.ok) {
@@ -95,15 +209,4 @@ createServerBtn.addEventListener("click", () => {
     }
 });
 
-function loadingServerList(servers) {
-    const serverArea = document.querySelector("#server-list");
-    servers.forEach((server) => {
-        const serverWrapperHTML = `
-        <div class="server-wrapper">
-            <div class="server">${server.name}</div>
-            <div class="pill"></div>
-        </div>
-        `;
-        serverArea.insertAdjacentHTML("beforeend", serverWrapperHTML);
-    });
-}
+serverInit();
