@@ -721,28 +721,6 @@ video:hover {
     cursor: pointer;
 }
 
-/* .pill:hover {
-    position: absolute;
-    height: 40px;
-    width: 8px;
-    left: -4px;
-    top: 50%;
-    transform: translate(0, -50%);
-    background-color: #fff;
-    border-radius: 4px;
-} */
-
-.pill-active {
-    position: absolute;
-    height: 40px;
-    width: 8px;
-    left: -4px;
-    top: 50%;
-    transform: translate(0, -50%);
-    background-color: #fff;
-    border-radius: 4px;
-}
-
 .server:hover, .server-active {
     background-color: #5865f2;
     border-radius: 18px;
@@ -751,7 +729,35 @@ video:hover {
 }
 
 .server-active{
-    cursor: pointer;
+    cursor: default;
+}
+
+.pill {
+    position: absolute;
+    height: 0;
+    width: 8px;
+    left: -4px;
+    top: 50%;
+    transform: translate(0, -50%);
+    background-color: #fff;
+    border-radius: 4px;
+    transition: height .2s ease-out;
+}
+
+.server:hover + .pill {
+    height: 20px;
+}
+
+.server-active + .pill, .server-active:hover + .pill  {
+    height: 40px;
+}
+
+#me-server {
+    cursor: default;
+}
+
+#me-server + .pill, #me-server:hover + .pill {
+    display: none;
 }
 
 .server > svg {
