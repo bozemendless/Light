@@ -1,264 +1,49 @@
-let isSocketConnect = false;
-let isChatLogLoading = false;
-let peer;
+// User data
 let userId;
 let username;
 let email;
-let peerId = null;
 let avatar = null;
-const channelMap = {};
-let currentInChanneL;
-let clickedChannel;
-const settingUnmuteSvg = document.querySelector("#setting-unmute-svg");
-const settingMuteSvg = document.querySelector("#setting-mute-svg");
-const mediaConnections = [];
-// const roomMember = [];
 
-// Channel label views
+// Websocket
+let isSocketConnect = false;
+let currentInChanneL;
+const channelMap = {};
+const webSocket = webSocketConnect();
+
+// P2P connection & WebRTC
+let peer;
+let peerId = null;
+const mediaConnections = [];
+const localStream = new MediaStream();
+
+// Servers
+let defaultServerLoading = false;
+let currentServerId;
+let currentServerName;
+const uls = [];
+const voiceChannelWrappersWrapperArray = [];
+
+// DOM
+const messageInput = document.querySelector("#message-input");
 const messageList = document.querySelector("#message-list");
 let channelActive = document.querySelector(".channel-active");
-const chatPage = document.querySelector(".chat");
-const videoPage = document.querySelector(".video");
-const onePeopleVideo = document.querySelector(".one-people-video");
-
-function switchChannel() {
-    if (channelActive.id === "general-chat-channel") {
-        chatPage.style.display = "flex";
-        videoPage.style.display = "none";
-    }
-
-    if (channelActive.id === "general-video-channel") {
-        videoPage.style.display = "block";
-        chatPage.style.display = "none";
-    }
-}
-
 const channelList = document.querySelector(".channel-list");
-const channelNameLabel = document.querySelectorAll(".channel-name-label");
-channelList.addEventListener("click", (event) => {
-    if (event.target.classList.contains("channel-active")) {
-        return;
-    }
-    if (
-        event.target.classList.contains("channel-name-label") &&
-        peerId != null
-    ) {
-        channelNameLabel.forEach((element) => {
-            element.classList.toggle("channel-active");
-        });
-        channelActive = document.querySelector(".channel-active");
-        switchChannel();
-    }
-});
+const generalVideoChannel = document.querySelector("#general-video-channel");
 
+// Functions
 function init() {
-    preload();
-
     switchChannel(); // default is general text channel
 
     // Get user infos
     getUserData();
 
-    // Get chat logs
-    getChatLogs()
-        .then((chatLogs) => {
-            // Show chat logs
-            createChatLogs(chatLogs);
-            isChatLogLoading = true;
-        })
-        .then(() => {
-            messageList.scrollTop = messageList.scrollHeight;
-            messageInput.focus();
-        });
-
     // Create My Peer Object
     peer = createMyPeer();
 
-    // Default media toggle
-    settingMuteSvg.style.display = "inline";
+    // Preload gif
+    preload();
 }
 
-function preload() {
-    const a = setInterval(() => {
-        if (isSocketConnect && isSocketConnect && isChatLogLoading) {
-            const preload = document.getElementById("preload");
-            preload.parentNode.removeChild(preload);
-            clearInterval(a);
-        }
-    }, 1000);
-}
-
-function createMyPeer() {
-    // Get my peerId
-    const peer = new Peer({
-        host: "0.peerjs.com",
-        port: 443,
-        path: "/",
-        pingInterval: 5000,
-    });
-
-    peer.on("open", function (id) {
-        peerId = id;
-    });
-
-    return peer;
-}
-
-init();
-
-// Join Voice Channel
-function joinVoiceChannel() {
-    // Change my already in Channel Name
-    currentInChanneL = "general-video-channel";
-    // const localStream = createLocalStream();
-    createLocalStream();
-
-    // Listen on WebSocket messages
-    webSocket.addEventListener("message", (event) => {
-        const parsedData = JSON.parse(event.data);
-        if (parsedData.type === "sdp") {
-            const action = parsedData["data"]["action"];
-
-            // be asked for connecting
-            if (action === "peer") {
-                const newPeerId = parsedData["data"]["peer_id"];
-                const peerUsername = parsedData["data"]["peer_username"];
-                const userId = parsedData["data"]["user_id"];
-                const peerChannelName = parsedData["data"]["peer_channel_name"];
-                if (peerId === newPeerId) {
-                    // do nothing with myself join message(ask for connecting)
-                    return;
-                }
-                // Existing members track the new member
-                channelMap[`${peerChannelName}`] = {
-                    peerUsername: peerUsername,
-                    peerId: newPeerId,
-                    userId: userId,
-                };
-                if (Object.keys(channelMap).length !== 0) {
-                    onePeopleVideo.style.display = "none";
-                }
-                // answer to new peer
-                const sendData = {
-                    action: "answer",
-                    userId: userId,
-                    peerId: peerId,
-                    username: username,
-                    peerChannelName: peerChannelName,
-                };
-                webSocket.send(JSON.stringify(sendData));
-
-                // *peers existing in room already * Connect to new peer
-                const call = peer.call(newPeerId, localStream);
-                mediaConnections.push(call.peerConnection);
-                // console.log(call.peerConnection.getSenders()[0]);
-                const { remoteVideo, remoteAudio } =
-                    createRemoteVideo(peerUsername);
-                call.on("stream", (stream) => {
-                    // console.log(stream.getVideoTracks());
-                    remoteVideo.srcObject = stream;
-                    remoteAudio.srcObject = stream;
-                });
-            }
-
-            if (action === "answer") {
-                const existingPeerId = parsedData["data"]["peer_id"];
-                const peerUsername = parsedData["data"]["peer_username"];
-                const userId = parsedData["data"]["user_id"];
-                const peerChannelName =
-                    parsedData["data"]["answer_channel_name"];
-                channelMap[`${peerChannelName}`] = {
-                    peerUsername: peerUsername,
-                    peerId: existingPeerId,
-                    userId: userId,
-                };
-                if (Object.keys(channelMap).length !== 0) {
-                    onePeopleVideo.style.display = "none";
-                }
-            }
-
-            if (action === "leave") {
-                const peerChannelName = parsedData["data"]["peer_channel_name"];
-                if (!channelMap.hasOwnProperty(peerChannelName)) {
-                    return;
-                }
-                const leaveUsername = channelMap[peerChannelName].peerUsername;
-                const leaveUserVideo = document.querySelector(
-                    `#${leaveUsername}-video`
-                );
-                if (leaveUserVideo) {
-                    removeVideo(leaveUserVideo);
-                }
-
-                delete channelMap[`${peerChannelName}`];
-                if (Object.keys(channelMap).length === 0) {
-                    onePeopleVideo.style.display = "block";
-                }
-            }
-        }
-    });
-
-    // *new-peer just joining the room *
-    // Send my peerId, (Light)userId, (Light)username to existing Members(ask for connecting)
-    const sendData = {
-        action: "peer",
-        peerId: peerId,
-        id: userId,
-        username: username,
-    };
-    webSocket.send(JSON.stringify(sendData));
-
-    // *new-peer just joining the room *
-    // Listen to existing members' connections (wait for connecting)
-
-    peer.on("call", (call) => {
-        // console.log("on call!");
-        call.answer(localStream);
-
-        mediaConnections.push(call.peerConnection);
-        let remotePeerUsername;
-        for (let peer in channelMap) {
-            remotePeerUsername = channelMap[peer].peerUsername;
-        }
-
-        const { remoteVideo, remoteAudio } =
-            createRemoteVideo(remotePeerUsername);
-
-        call.on("stream", (stream) => {
-            remoteVideo.srcObject = stream;
-            remoteAudio.srcObject = stream;
-        });
-        call.on("error", (e) => {
-            console.log(e);
-        });
-        call.on("close", () => {
-            console.log("media connection closed");
-            // mediaConnections.remove(call.peerConnection);
-        });
-    });
-    // peer.on("close", () => {
-    //     console.log("peer on closed!");
-    // });
-    // peer.on("disconnected", () => {
-    //     console.log("peer on disconnected");
-    // });
-}
-const generalVideoChannel = document.querySelector("#general-video-channel");
-generalVideoChannel.addEventListener("click", () => {
-    if (isSocketConnect === true) {
-        clickedChannel = "general-video-channel";
-
-        // been joined channel and the current channel cannot be the same
-        if (currentInChanneL === clickedChannel) {
-            console.log("already in this channel");
-        }
-        if (currentInChanneL !== clickedChannel && peerId != null) {
-            joinVoiceChannel();
-        }
-    }
-});
-
-// Functions
 async function getUserData() {
     const getUserDataUrl = "/api/user/auth";
 
@@ -332,10 +117,190 @@ function updateAvatar(type, newAvatar) {
     settingAvatarImg.src = src;
 }
 
+function createMyPeer() {
+    // Get my peerId
+    const peer = new Peer({
+        host: "0.peerjs.com",
+        port: 443,
+        path: "/",
+        pingInterval: 5000,
+    });
+
+    peer.on("open", function (id) {
+        peerId = id;
+    });
+
+    return peer;
+}
+
+function preload() {
+    const a = setInterval(() => {
+        if (isSocketConnect && peerId && defaultServerLoading) {
+            const preload = document.getElementById("preload");
+            preload.parentNode.removeChild(preload);
+            clearInterval(a);
+        }
+    }, 2000);
+}
+
+function switchChannel() {
+    const chatPage = document.querySelector(".chat");
+    const videoPage = document.querySelector(".video");
+    if (channelActive.id === "general-chat-channel") {
+        chatPage.style.display = "flex";
+        videoPage.style.display = "none";
+    }
+
+    if (channelActive.id === "general-video-channel") {
+        videoPage.style.display = "block";
+        chatPage.style.display = "none";
+    }
+}
+
+// Join Voice Channel
+function joinVoiceChannel(server) {
+    const onePeopleVideo = document.querySelector(".one-people-video");
+    console.log(server);
+    // Change my already in Channel Name
+    currentInChanneL = "general-video-channel";
+    createLocalStream();
+
+    // Listen on WebSocket messages
+    webSocket.addEventListener("message", (event) => {
+        const parsedData = JSON.parse(event.data);
+        if (parsedData.type === "sdp") {
+            const action = parsedData["data"]["action"];
+
+            // (existing peer) be asked for connecting
+            if (action === "peer") {
+                const newPeerId = parsedData["data"]["peer_id"];
+                const peerUsername = parsedData["data"]["peer_username"];
+                const userId = parsedData["data"]["user_id"];
+                const peerChannelName = parsedData["data"]["peer_channel_name"];
+                const peerServerId = parsedData["data"]["peer_server_id"];
+                if (peerId === newPeerId || peerServerId !== currentServerId) {
+                    // do nothing with myself join message(ask for connecting)
+                    return;
+                }
+                // Existing members track the new member
+                channelMap[`${peerChannelName}`] = {
+                    peerUsername: peerUsername,
+                    peerId: newPeerId,
+                    userId: userId,
+                    peerServerId: peerServerId,
+                };
+                if (Object.keys(channelMap).length !== 0) {
+                    onePeopleVideo.style.display = "none";
+                }
+
+                //  same server
+                if (peerServerId === currentServerId) {
+                    // answer to new peer
+                    const sendData = {
+                        action: "answer",
+                        userId: userId,
+                        peerId: peerId,
+                        username: username,
+                        peerChannelName: peerChannelName,
+                    };
+                    webSocket.send(JSON.stringify(sendData));
+
+                    // *peers existing in room already * Connect to new peer
+                    const call = peer.call(newPeerId, localStream);
+                    mediaConnections.push(call.peerConnection);
+                    // console.log(call.peerConnection.getSenders()[0]);
+                    const { remoteVideo, remoteAudio } =
+                        createRemoteVideo(peerUsername);
+                    call.on("stream", (stream) => {
+                        // console.log(stream.getVideoTracks());
+                        remoteVideo.srcObject = stream;
+                        remoteAudio.srcObject = stream;
+                    });
+                }
+            }
+
+            if (action === "answer") {
+                const existingPeerId = parsedData["data"]["peer_id"];
+                const peerUsername = parsedData["data"]["peer_username"];
+                const userId = parsedData["data"]["user_id"];
+                const peerChannelName =
+                    parsedData["data"]["answer_channel_name"];
+                channelMap[`${peerChannelName}`] = {
+                    peerUsername: peerUsername,
+                    peerId: existingPeerId,
+                    userId: userId,
+                };
+                if (Object.keys(channelMap).length !== 0) {
+                    onePeopleVideo.style.display = "none";
+                }
+            }
+
+            if (action === "leave") {
+                const peerChannelName = parsedData["data"]["peer_channel_name"];
+                if (!channelMap.hasOwnProperty(peerChannelName)) {
+                    return;
+                }
+                const leaveUsername = channelMap[peerChannelName].peerUsername;
+                const leaveUserVideo = document.querySelector(
+                    `#${leaveUsername}-video`
+                );
+                if (leaveUserVideo) {
+                    deleteVideo(leaveUserVideo);
+                }
+
+                delete channelMap[`${peerChannelName}`];
+                if (Object.keys(channelMap).length === 0) {
+                    onePeopleVideo.style.display = "block";
+                }
+            }
+        }
+    });
+
+    // *new-peer just joining the room *
+    // Send my peerId, (Light)userId, (Light)username to existing Members(ask for connecting)
+    const sendData = {
+        action: "peer",
+        peerId: peerId,
+        id: userId,
+        username: username,
+        server: currentServerId,
+    };
+    webSocket.send(JSON.stringify(sendData));
+
+    // *new-peer just joining the room *
+    // Listen to existing members' connections (wait for connecting)
+
+    peer.on("call", (call) => {
+        // console.log("on call!");
+        call.answer(localStream);
+
+        mediaConnections.push(call.peerConnection);
+        let remotePeerUsername;
+        for (let peer in channelMap) {
+            remotePeerUsername = channelMap[peer].peerUsername;
+        }
+
+        const { remoteVideo, remoteAudio } =
+            createRemoteVideo(remotePeerUsername);
+
+        call.on("stream", (stream) => {
+            remoteVideo.srcObject = stream;
+            remoteAudio.srcObject = stream;
+        });
+        call.on("error", (e) => {
+            console.log(e);
+        });
+        call.on("close", () => {
+            console.log("media connection closed");
+            // mediaConnections.remove(call.peerConnection);
+        });
+    });
+}
+
 // Chat Logs
 // Get history chat logs when user logs in
-async function getChatLogs() {
-    const getChatLogsUrl = "/api/chat_logs";
+async function getChatLogs(server) {
+    const getChatLogsUrl = `/api/chat?server_id=${server}`;
     const response = await fetch(getChatLogsUrl);
     const data = await response.json();
     return data.data;
@@ -348,23 +313,28 @@ function createChatLogs(data) {
     yesterday.setDate(yesterday.getDate() - 1);
 
     data.forEach((chatLog) => {
+        if (chatLog.length === 0) {
+            return;
+        }
         // if a user was texting continuously, the dom structure will be different
         let isSameUserTexting = false;
 
         // the fist message in the history would not have previous log >> lastUserDiv | null
-        const lastUserDiv = messageList.lastChild;
+        // const ulObject = uls.find((ul) => ul.id === chatLog["server"]);
+        // currentServerId
+        // const lastUserDiv = ulObject.ul.lastChild;
 
-        // check if is first chat log
-        if (lastUserDiv) {
-            const lastUser =
-                lastUserDiv.querySelector(".message-user").textContent;
-            // check if the same user texting continuously
-            if (lastUser === chatLog["username"]) {
-                isSameUserTexting = true;
-            } else {
-                isSameUserTexting = false;
-            }
-        }
+        // // check if is first chat log
+        // if (lastUserDiv) {
+        //     const lastUser =
+        //         lastUserDiv.querySelector(".message-user").textContent;
+        //     // check if the same user texting continuously
+        //     if (lastUser === chatLog["username"]) {
+        //         isSameUserTexting = true;
+        //     } else {
+        //         isSameUserTexting = false;
+        //     }
+        // }
 
         const messageDiv = document.createElement("div");
         const messageContentDiv = document.createElement("div");
@@ -376,8 +346,10 @@ function createChatLogs(data) {
         const messageContentTextNode = document.createTextNode(
             chatLog["message"].replace(/&newline;/g, "\n")
         );
+        const ulObject = uls.find((ul) => ul.id === chatLog["server"]);
+        ulObject.ul.appendChild(messageDiv);
 
-        messageList.appendChild(messageDiv);
+        // messageList.
         messageDiv.appendChild(messageContentDiv);
         messageContentDiv.appendChild(messageUserAvatar);
         messageContentDiv.appendChild(messageHeader);
@@ -437,13 +409,33 @@ function createChatLogs(data) {
             displayTime = `${chatTime.getFullYear()}/${month}/${date} ${hour}:${minutes}`;
         }
         messageTime.textContent = displayTime;
+        ulObject.ul.scrollTop = ulObject.ul.scrollHeight;
     });
-    messageList.scrollTop = messageList.scrollHeight;
+}
+
+function sendMessage(message) {
+    const sendData = {
+        action: "message",
+        id: userId,
+        username: username,
+        message: message,
+        serverId: currentServerId,
+    };
+    const today = new Date();
+    const arr = [
+        {
+            avatar: avatar,
+            message: message,
+            username: username,
+            server: currentServerId,
+            time: today,
+        },
+    ];
+    createChatLogs(arr);
+    webSocket.send(JSON.stringify(sendData));
 }
 
 // WebSocket
-const webSocket = webSocketConnect();
-
 function webSocketConnect() {
     // Connect to server
     let wsStart = "ws://";
@@ -463,7 +455,10 @@ function webSocketConnect() {
         // Listen to chat message
         if (parsedData.type === "message") {
             const arr = [parsedData.data];
-            if (arr[0]["username"] === username) {
+            if (
+                arr[0]["username"] === username && // self's message
+                serverLoadingStatus[arr[0]["server"]] // already loading
+            ) {
                 return;
             } else {
                 createChatLogs(arr);
@@ -486,6 +481,7 @@ function webSocketConnect() {
                     {
                         peer_username: parsedData.data.peer_username,
                         peer_channel_name: parsedData.data.peer_channel_name,
+                        peer_server_id: parsedData.data.peer_server_id,
                     },
                 ];
                 showChannelMember("join_room", members);
@@ -499,6 +495,7 @@ function webSocketConnect() {
                     {
                         peer_username: parsedData.data.peer_username,
                         peer_channel_name: parsedData.data.peer_channel_name,
+                        peer_server_id: parsedData.data.peer_server_id,
                     },
                 ];
                 showChannelMember("leave_room", members);
@@ -523,46 +520,8 @@ function webSocketConnect() {
     return webSocket;
 }
 
-// Send Chat Message via WebSocket
-const messageInput = document.querySelector("#message-input");
-messageInput.addEventListener("keydown", (event) => {
-    if (isSocketConnect) {
-        if (event.key === "Enter" && !event.shiftKey) {
-            // event.preventDefault();
-            if (messageInput.value.trim() !== "") {
-                const messageValue = messageInput.value.replace(
-                    /\n/g,
-                    "&newline;"
-                );
-                sendMessage(messageValue);
-                messageInput.value = "";
-            }
-        }
-    }
-});
-
-function sendMessage(message) {
-    const sendData = {
-        action: "message",
-        id: userId,
-        username: username,
-        message: message,
-    };
-    const today = new Date();
-    const arr = [
-        {
-            avatar: avatar,
-            message: message,
-            username: username,
-            time: today,
-        },
-    ];
-    createChatLogs(arr);
-    webSocket.send(JSON.stringify(sendData));
-}
 // Stream
 // Local Video
-const localStream = new MediaStream();
 async function createLocalStream() {
     const localVideo = document.querySelector("#local-video");
     const cameraBtn = document.querySelector("#camera-btn");
@@ -634,19 +593,6 @@ async function createLocalStream() {
 
     localVideo.srcObject = localStream;
     localVideo.muted = true;
-
-    // console.log(localStream.getTracks());
-
-    // Create silence audio track
-    // function createFakeAudioTrack() {
-    //     const ctx = new AudioContext();
-    //     const oscillator = ctx.createOscillator();
-    //     const destination = ctx.createMediaStreamDestination();
-    //     oscillator.connect(destination);
-    //     oscillator.start();
-    //     destination.stream.getAudioTracks()[0].enable = false;
-    //     return destination.stream.getAudioTracks()[0];
-    // }
 
     // Create avatar video track
     function createAvatarVideoTrack() {
@@ -745,6 +691,8 @@ async function createLocalStream() {
     }
 
     function audioBtnClick() {
+        const settingUnmuteSvg = document.querySelector("#setting-unmute-svg");
+        const settingMuteSvg = document.querySelector("#setting-mute-svg");
         audioTracks[0].enabled = !audioTracks[0].enabled;
         if (audioTracks[0].enabled) {
             audioBtn.classList.add("audio-active");
@@ -768,7 +716,7 @@ async function createLocalStream() {
     }
 }
 
-// RemoTe Video
+// Remote Video
 /*
 We need to separate the video and audio element here, because of Chrome!!! Google Chrome!!!!!
 In Chrome, video element won't autoplay before it receives the first frame!!!
@@ -803,8 +751,8 @@ function createRemoteVideo(peerUsername) {
     return { remoteVideo: remoteVideo, remoteAudio: remoteAudio };
 }
 
-// RemoVe Video
-function removeVideo(video) {
+// Delete Video
+function deleteVideo(video) {
     const videoWrapper = video.parentNode;
     if (videoWrapper) {
         videoWrapper.parentNode.removeChild(videoWrapper);
@@ -814,7 +762,8 @@ function removeVideo(video) {
 
 // Show channel member
 function showChannelMember(action, members) {
-    const voiceChannelDiv = document.querySelector(".voice-channel");
+    console.log(action, members);
+
     if (action === "join_room") {
         members.forEach((member) => {
             const voiceUserWrapper = document.createElement("div");
@@ -830,7 +779,10 @@ function showChannelMember(action, members) {
             voiceUser.appendChild(voiceUserAvatar);
             voiceUser.appendChild(voiceUsername);
             voiceUserWrapper.appendChild(voiceUser);
-            voiceChannelDiv.appendChild(voiceUserWrapper);
+            const wrapper = voiceChannelWrappersWrapperArray.find(
+                (wrapper) => wrapper.id === member.peer_server_id
+            ).wrapper;
+            wrapper.appendChild(voiceUserWrapper);
         });
     }
 
@@ -844,178 +796,54 @@ function showChannelMember(action, members) {
     }
 }
 
-/*
+// Event Listener
+// 點擊了哪個頻道
+channelList.addEventListener("click", (event) => {
+    const channelNameLabel = document.querySelectorAll(".channel-name-label");
+    if (event.target.classList.contains("channel-active")) {
+        return;
+    }
+    if (event.target.classList.contains("channel-name-label")) {
+        channelNameLabel.forEach((element) => {
+            element.classList.toggle("channel-active");
+        });
+        channelActive = document.querySelector(".channel-active");
+        switchChannel();
+    }
+});
 
+generalVideoChannel.addEventListener("click", () => {
+    let clickedChannel;
+    if (isSocketConnect === true) {
+        clickedChannel = "general-video-channel";
 
+        // been joined channel and the current channel cannot be the same
+        if (currentInChanneL === clickedChannel) {
+            console.log("already in this channel");
+        }
+        if (currentInChanneL !== clickedChannel && peerId != null) {
+            joinVoiceChannel(currentServerId);
+        }
+    }
+});
 
+// Send Chat Message via WebSocket
+messageInput.addEventListener("keydown", (event) => {
+    if (isSocketConnect) {
+        if (event.key === "Enter" && !event.shiftKey) {
+            // event.preventDefault();
+            if (messageInput.value.trim() !== "") {
+                const messageValue = messageInput.value.replace(
+                    /\n/g,
+                    "&newline;"
+                );
+                sendMessage(messageValue);
+                messageInput.value = "";
+            }
+        }
+    }
+});
 
+// Init
 
-
-
-
-*/
-// // let peer;
-// const configuration = {
-//     iceServers: [
-//         {
-//             urls: [
-//                 "stun:stun.l.google.com:19302",
-//                 "stun:stun1.l.google.com:19302",
-//                 // "stun:stun2.l.google.com:19302",
-//             ],
-//         },
-//     ],
-// };
-
-// // create offer
-// function createOffer(peerUsername, receiverChannelName) {
-//     const peer = new RTCPeerConnection(configuration);
-
-//     // add local tracks
-//     addLocalTracks(peer);
-
-//     const dc = peer.createDataChannel("channel");
-//     dc.addEventListener("open", () => {
-//         console.log("create offer open dc");
-//     });
-
-//     const remoteVideo = createRemoteVideo(peerUsername);
-//     setOnTrack(peer, remoteVideo);
-
-//     mapPeers[peerUsername] = [peer, dc];
-
-//     peer.addEventListener("iceconnectionstatechange", () => {
-//         const iceConnectionState = peer.iceConnectionState;
-//         console.log(111, iceConnectionState);
-
-//         if (
-//             iceConnectionState === "failed" ||
-//             iceConnectionState === "disconnected" ||
-//             iceConnectionState === "closed"
-//         ) {
-//             delete mapPeers[peerUsername];
-
-//             if (iceConnectionState !== "closed") {
-//                 peer.close();
-//             }
-
-//             removeVideo(remoteVideo);
-//         }
-//     });
-
-//     peer.addEventListener("icecandidate", (e) => {
-//         if (e.candidate) {
-//             console.log("new ice candidate");
-
-//             return;
-//         }
-
-//         sendSignal("new-offer", username, {
-//             sdp: peer.localDescription,
-//             receiver_channel_name: receiverChannelName,
-//         });
-//     });
-
-//     peer.createOffer()
-//         .then((offer) => {
-//             peer.setLocalDescription(offer);
-//         })
-//         .then(() => {
-//             console.log("setLocalDescription set successfully");
-//         });
-// }
-
-// // Add Local Tracks
-// function addLocalTracks(peer) {
-//     localStream.getTracks().forEach((track) => {
-//         peer.addTrack(track, localStream);
-//     });
-
-//     return;
-// }
-
-// // Set On Track
-// function setOnTrack(peer, remoteVideo) {
-//     const remoteStream = new MediaStream();
-
-//     remoteVideo.srcObject = remoteStream;
-
-//     peer.addEventListener("track", async (event) => {
-//         remoteStream.addTrack(event.track, remoteStream);
-//     });
-// }
-
-// // Create Answer
-// function createAnswer(sdp, peerUsername, receiverChannelName) {
-//     const peer = new RTCPeerConnection(configuration);
-
-//     // add local tracks
-//     addLocalTracks(peer);
-
-//     const remoteVideo = createRemoteVideo(peerUsername);
-//     setOnTrack(peer, remoteVideo);
-
-//     peer.addEventListener("datachannel", (e) => {
-//         peer.dc = e.channel;
-//         peer.dc.addEventListener("open", () => {
-//             console.log("ans open dc");
-//         });
-
-//         mapPeers[peerUsername] = [peer, peer.dc];
-//     });
-
-//     peer.addEventListener("iceconnectionstatechange", () => {
-//         const iceConnectionState = peer.iceConnectionState;
-//         console.log(iceConnectionState);
-
-//         if (
-//             iceConnectionState === "failed" ||
-//             iceConnectionState === "disconnected" ||
-//             iceConnectionState === "closed"
-//         ) {
-//             delete mapPeers[peerUsername];
-
-//             if (iceConnectionState !== "closed") {
-//                 peer.close();
-//             }
-//             removeVideo(remoteVideo);
-//         }
-//     });
-
-//     peer.addEventListener("icecandidate", (event) => {
-//         if (event.candidate) {
-//             console.log("new ice candidate");
-
-//             return;
-//         }
-//     });
-
-//     peer.setRemoteDescription(sdp)
-//         .then(() => {
-//             console.log(
-//                 `remote description set successfully for ${peerUsername}`
-//             );
-
-//             return peer.createAnswer();
-//         })
-//         .then((a) => {
-//             console.log("ans created");
-
-//             peer.setLocalDescription(a);
-//         })
-//         .then(() => {
-//             sendSignal("new-answer", username, {
-//                 sdp: peer.localDescription,
-//                 receiver_channel_name: receiverChannelName,
-//             });
-//         });
-// }
-
-// function sendSignal(action, username, message) {
-//     const sendData = {
-//         action: action,
-//         username: username,
-//         message: message,
-//     };
-//     webSocket.send(JSON.stringify(sendData));
-// }
+init();
