@@ -25,12 +25,6 @@
             </div>
             <div class="server-separator"></div>
             <div class="server-area" id="server-list">
-                <div class="server-wrapper">
-                    <div class="server server-active">
-                        Light
-                    </div>
-                    <div class="pill pill-active"></div>
-                </div>
             </div>
             <div class="server-area">
                 <div class="server-wrapper">
@@ -46,11 +40,11 @@
             <div class="searchBar">
             </div>
             <div class="channel-list">
-                <div class="channel-name">
+                <div class="channel-name" id="channel-name">
                 Light
                 </div>
                 <div class="text-channel channel-type">
-                    <div class="text-channel-label channel-label pointer">
+                    <div class="text-channel-label channel-label">
                         <div class="arrow-down-icon-div">
                             <svg class="arrow-down-icon" width="12" height="12" viewBox="0 0 24 24"><path fill="currentColor" d="M16.59 8.59004L12 13.17L7.41 8.59004L6 10L12 16L18 10L16.59 8.59004Z"></path></svg>
                         </div>
@@ -64,7 +58,7 @@
                     </div> 
                 </div>
                 <div class="voice-channel channel-type">
-                    <div class="voice-channel-label channel-label pointer">
+                    <div class="voice-channel-label channel-label">
                         <div class="arrow-down-icon-div">
                             <svg class="arrow-down-icon" width="12" height="12" viewBox="0 0 24 24">
                                 <path fill="currentColor" d="M16.59 8.59004L12 13.17L7.41 8.59004L6 10L12 16L18 10L16.59 8.59004Z" />
@@ -77,20 +71,7 @@
                             <path fill="currentColor" d="M11.383 3.07904C11.009 2.92504 10.579 3.01004 10.293 3.29604L6 8.00204H3C2.45 8.00204 2 8.45304 2 9.00204V15.002C2 15.552 2.45 16.002 3 16.002H6L10.293 20.71C10.579 20.996 11.009 21.082 11.383 20.927C11.757 20.772 12 20.407 12 20.002V4.00204C12 3.59904 11.757 3.23204 11.383 3.07904ZM14 5.00195V7.00195C16.757 7.00195 19 9.24595 19 12.002C19 14.759 16.757 17.002 14 17.002V19.002C17.86 19.002 21 15.863 21 12.002C21 8.14295 17.86 5.00195 14 5.00195ZM14 9.00195C15.654 9.00195 17 10.349 17 12.002C17 13.657 15.654 15.002 14 15.002V13.002C14.551 13.002 15 12.553 15 12.002C15 11.451 14.551 11.002 14 11.002V9.00195Z" />
                         </svg>
                         一般
-                        
                     </div>
-                    <!-- <div class="voice-user-wrapper">
-                        <div class="voice-user">
-                            <div class="voice-user-avatar"></div>
-                            <div class="voice-username">使用者</div>
-                        </div>
-                    </div>
-                    <div class="voice-user-wrapper">
-                        <div class="voice-user">
-                            <div class="voice-user-avatar"></div>
-                            <div class="voice-username">使用者2</div>
-                        </div>
-                    </div> -->
                 </div>
             </div>
             <div class="setting">
@@ -104,10 +85,15 @@
                 </div>
                 <div class="control-buttons">
                     <div class="mute-button">
-                        <svg width="20" height="20" viewBox="0 0 24 24" id="setting-mute-svg"><path d="M6.7 11H5C5 12.19 5.34 13.3 5.9 14.28L7.13 13.05C6.86 12.43 6.7 11.74 6.7 11Z" fill="currentColor"></path><path d="M9.01 11.085C9.015 11.1125 9.02 11.14 9.02 11.17L15 5.18V5C15 3.34 13.66 2 12 2C10.34 2 9 3.34 9 5V11C9 11.03 9.005 11.0575 9.01 11.085Z" fill="currentColor"></path><path d="M11.7237 16.0927L10.9632 16.8531L10.2533 17.5688C10.4978 17.633 10.747 17.6839 11 17.72V22H13V17.72C16.28 17.23 19 14.41 19 11H17.3C17.3 14 14.76 16.1 12 16.1C11.9076 16.1 11.8155 16.0975 11.7237 16.0927Z" fill="currentColor"></path><path d="M21 4.27L19.73 3L3 19.73L4.27 21L8.46 16.82L9.69 15.58L11.35 13.92L14.99 10.28L21 4.27Z" class="strikethrough" fill="#ed4245"></path></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" id="setting-mute-svg" style="display: inline;">
+                            <path d="M6.7 11H5C5 12.19 5.34 13.3 5.9 14.28L7.13 13.05C6.86 12.43 6.7 11.74 6.7 11Z" fill="currentColor" />
+                            <path d="M9.01 11.085C9.015 11.1125 9.02 11.14 9.02 11.17L15 5.18V5C15 3.34 13.66 2 12 2C10.34 2 9 3.34 9 5V11C9 11.03 9.005 11.0575 9.01 11.085Z" fill="currentColor" />
+                            <path d="M11.7237 16.0927L10.9632 16.8531L10.2533 17.5688C10.4978 17.633 10.747 17.6839 11 17.72V22H13V17.72C16.28 17.23 19 14.41 19 11H17.3C17.3 14 14.76 16.1 12 16.1C11.9076 16.1 11.8155 16.0975 11.7237 16.0927Z" fill="currentColor" />
+                            <path d="M21 4.27L19.73 3L3 19.73L4.27 21L8.46 16.82L9.69 15.58L11.35 13.92L14.99 10.28L21 4.27Z" class="strikethrough" fill="#ed4245" />
+                        </svg>
                         <svg width="20" height="20" viewBox="0 0 24 24" id="setting-unmute-svg" style="display: none;">
-                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V21H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1ZM12 4C11.2 4 11 4.66667 11 5V11C11 11.3333 11.2 12 12 12C12.8 12 13 11.3333 13 11V5C13 4.66667 12.8 4 12 4Z" fill="currentColor"></path>
-                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V22H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1Z" fill="currentColor"></path>
+                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V21H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1ZM12 4C11.2 4 11 4.66667 11 5V11C11 11.3333 11.2 12 12 12C12.8 12 13 11.3333 13 11V5C13 4.66667 12.8 4 12 4Z" fill="currentColor" />
+                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V22H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1Z" fill="currentColor" />
                         </svg>
                     </div>
                     <div class="listen-button">
@@ -137,7 +123,6 @@
                 <div class="chat">
                     <div class="messages-wrapper">
                         <div id="messages">
-                            <ul class="message-list" id="message-list"></ul>
                         </div>
 
                     </div>
@@ -165,20 +150,26 @@
                         </div>
                         <div class="toggles">
                             <div class="camera-button-wrapper voice-button-wrapper pointer" id="camera-btn">
-                                <button type="button" ><div><svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M21.526 8.149C21.231 7.966 20.862 7.951 20.553 8.105L18 9.382V7C18 5.897 17.103 5 16 5H4C2.897 5 2 5.897 2 7V17C2 18.104 2.897 19 4 19H16C17.103 19 18 18.104 18 17V14.618L20.553 15.894C20.694 15.965 20.847 16 21 16C21.183 16 21.365 15.949 21.526 15.851C21.82 15.668 22 15.347 22 15V9C22 8.653 21.82 8.332 21.526 8.149Z"></path></svg></div></button>
+                                <button type="button" >
+                                    <div>
+                                        <svg width="24" height="24" viewBox="0 0 24 24">
+                                            <path fill="currentColor" d="M21.526 8.149C21.231 7.966 20.862 7.951 20.553 8.105L18 9.382V7C18 5.897 17.103 5 16 5H4C2.897 5 2 5.897 2 7V17C2 18.104 2.897 19 4 19H16C17.103 19 18 18.104 18 17V14.618L20.553 15.894C20.694 15.965 20.847 16 21 16C21.183 16 21.365 15.949 21.526 15.851C21.82 15.668 22 15.347 22 15V9C22 8.653 21.82 8.332 21.526 8.149Z" />
+                                        </svg>
+                                    </div>
+                                </button>
                             </div>
                             <div class="audio-button-wrapper voice-button-wrapper pointer" id="audio-btn">
                                 <button type="button" >
                                     <div>
                                         <svg width="24" height="24" viewBox="0 0 24 24" id="audio-off-svg">
-                                            <path d="M6.7 11H5C5 12.19 5.34 13.3 5.9 14.28L7.13 13.05C6.86 12.43 6.7 11.74 6.7 11Z" fill="currentColor"></path>
-                                            <path d="M9.01 11.085C9.015 11.1125 9.02 11.14 9.02 11.17L15 5.18V5C15 3.34 13.66 2 12 2C10.34 2 9 3.34 9 5V11C9 11.03 9.005 11.0575 9.01 11.085Z" fill="currentColor"></path>
-                                            <path d="M11.7237 16.0927L10.9632 16.8531L10.2533 17.5688C10.4978 17.633 10.747 17.6839 11 17.72V22H13V17.72C16.28 17.23 19 14.41 19 11H17.3C17.3 14 14.76 16.1 12 16.1C11.9076 16.1 11.8155 16.0975 11.7237 16.0927Z" fill="currentColor"></path>
-                                            <path d="M21 4.27L19.73 3L3 19.73L4.27 21L8.46 16.82L9.69 15.58L11.35 13.92L14.99 10.28L21 4.27Z" class="strikethrough" id="strikethrough"></path>
+                                            <path d="M6.7 11H5C5 12.19 5.34 13.3 5.9 14.28L7.13 13.05C6.86 12.43 6.7 11.74 6.7 11Z" fill="currentColor" />
+                                            <path d="M9.01 11.085C9.015 11.1125 9.02 11.14 9.02 11.17L15 5.18V5C15 3.34 13.66 2 12 2C10.34 2 9 3.34 9 5V11C9 11.03 9.005 11.0575 9.01 11.085Z" fill="currentColor" />
+                                            <path d="M11.7237 16.0927L10.9632 16.8531L10.2533 17.5688C10.4978 17.633 10.747 17.6839 11 17.72V22H13V17.72C16.28 17.23 19 14.41 19 11H17.3C17.3 14 14.76 16.1 12 16.1C11.9076 16.1 11.8155 16.0975 11.7237 16.0927Z" fill="currentColor" />
+                                            <path d="M21 4.27L19.73 3L3 19.73L4.27 21L8.46 16.82L9.69 15.58L11.35 13.92L14.99 10.28L21 4.27Z" class="strikethrough" id="strikethrough" />
                                         </svg>
                                         <svg width="24" height="24" viewBox="0 0 24 24" id="audio-on-svg" style="display: none;">
-                                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V21H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1ZM12 4C11.2 4 11 4.66667 11 5V11C11 11.3333 11.2 12 12 12C12.8 12 13 11.3333 13 11V5C13 4.66667 12.8 4 12 4Z" fill="currentColor"></path>
-                                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V22H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1Z" fill="currentColor"></path>
+                                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V21H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1ZM12 4C11.2 4 11 4.66667 11 5V11C11 11.3333 11.2 12 12 12C12.8 12 13 11.3333 13 11V5C13 4.66667 12.8 4 12 4Z" fill="currentColor" />
+                                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V22H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1Z" fill="currentColor" />
                                         </svg>
                                     </div>
                                 </button>
@@ -186,15 +177,15 @@
                             <div class="leave-button-wrapper voice-button-wrapper pointer" id="leave-btn">
                                 <button type="button">
                                     <div>
-                                        <svg id="leave-svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M21.1169 1.11603L22.8839 2.88403L19.7679 6.00003L22.8839 9.11603L21.1169 10.884L17.9999 7.76803L14.8839 10.884L13.1169 9.11603L16.2329 6.00003L13.1169 2.88403L14.8839 1.11603L17.9999 4.23203L21.1169 1.11603ZM18 22H13C6.925 22 2 17.075 2 11V6C2 5.447 2.448 5 3 5H7C7.553 5 8 5.447 8 6V10C8 10.553 7.553 11 7 11H6C6.063 14.938 9 18 13 18V17C13 16.447 13.447 16 14 16H18C18.553 16 19 16.447 19 17V21C19 21.553 18.553 22 18 22Z"></path></svg>
+                                        <svg id="leave-svg" width="24" height="24" viewBox="0 0 24 24">
+                                            <path fill="currentColor" d="M21.1169 1.11603L22.8839 2.88403L19.7679 6.00003L22.8839 9.11603L21.1169 10.884L17.9999 7.76803L14.8839 10.884L13.1169 9.11603L16.2329 6.00003L13.1169 2.88403L14.8839 1.11603L17.9999 4.23203L21.1169 1.11603ZM18 22H13C6.925 22 2 17.075 2 11V6C2 5.447 2.448 5 3 5H7C7.553 5 8 5.447 8 6V10C8 10.553 7.553 11 7 11H6C6.063 14.938 9 18 13 18V17C13 16.447 13.447 16 14 16H18C18.553 16 19 16.447 19 17V21C19 21.553 18.553 22 18 22Z" />
+                                        </svg>
                                     </div>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                
             </div>
             <div class="setting-page" style="display: none;">
                 <nav class="side-bar">
@@ -220,7 +211,6 @@
                                         </svg>
                                     </div>
                                 </a>   
-                                
                             </div>
                         </div>
                     </div>
@@ -263,7 +253,7 @@
                                         <div class="user-info-background-edit pointer" id="edit-email-button">
                                             <div class="user-info-background-edit-button">編輯</div>
                                         </div>
-                                        
+
                                     </div>
                                 </div>
                             </div>
@@ -274,7 +264,7 @@
                             <div class="setting-page-title">個人資料</div>
                             <div class="tab-bar">
                                 <div class="tab-bar-item tab-bar-item-active">使用者個人資料</div>
-                                <div class="tab-bar-item">伺服器個人資料</div>
+                                {% comment %} <div class="tab-bar-item">伺服器個人資料</div> {% endcomment %}
                             </div>
                             <div class="profile-customization-sections">
                                 <div class="profile-customization-editor profile-customization-session">
@@ -350,9 +340,10 @@
     <script>const url = "{% static 'channel/imgs/default_avatar-512x512.png' %}";</script>
     <script>const streamAvatarUrl = "{% static 'channel/imgs/default_avatar-512x512.png' %}";</script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script src="{% static 'channel/js/server.js' %}"></script>
     <script src="{% static 'channel/js/channel.js' %}"></script>
     <script src="{% static 'channel/js/setting.js' %}"></script>
-    <script src="{% static 'channel/js/server.js' %}"></script>
+    
 
 </body>
 </html>
