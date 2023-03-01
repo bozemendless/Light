@@ -43,11 +43,10 @@ def server(request):
                     for server in servers
                 ] 
             }
-            print(res)
             return JsonResponse(res)
             # except:
             #     pass
-    else: 
+        else: 
             # token not in session
             return redirect('/login')
 
