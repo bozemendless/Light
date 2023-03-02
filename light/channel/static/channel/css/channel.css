@@ -91,14 +91,366 @@ textarea {
 
 
 .channel-name {
-    font-size: 18px;
     text-align: center;
     padding-top: 10px;
     height: 50px;
     border-bottom: 2px solid #292b30;
+    position: relative;
+    cursor: pointer;
+}
+
+.channel-name:hover {
+    background-color: #35373c;
+}
+
+.channel-name> .channel-name-text {
+    font-size: 18px;
     font-weight: bold;
     color: #fff;
+    pointer-events: none;
 }
+
+.channel-name > .hamburger {
+    position: absolute;
+    top: 13px;
+    right: 20px;
+}
+
+.channel-name > .hamburger > div {
+    background-color: #cdced0;
+    border-radius: 50%;
+    width: 4px;
+    height: 4px;
+    margin: 2px;
+}
+
+.server-menu {
+    position: absolute;
+    left: 82px;
+    top: 60px;
+    width: 220px;
+    background-color: #111214;
+    padding: 6px 8px;
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 8px 16px 0;
+    z-index: 1;
+}
+
+#menu-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100%;
+}
+
+
+.server-menu > ul > li {
+    width: 204px;
+    height: 32px;
+    padding: 6px 8px;
+    margin: 2px 0;
+    font-size: 14px;
+    line-height: 18px;
+    text-align: center;
+    color: #b8b9bf;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.server-menu > ul > li:hover {
+    background-color: #4752c4;
+    color: #FFF;
+}
+
+/* add member */
+.add-member-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    border-radius: 5px;
+    box-shadow: rgb(199 200 206 / 30%) 0px 0px 0px 1px;
+    background-color: #313338;
+}
+
+.add-member-wrapper>.add-member-title-div {
+    height: 90px;
+    padding: 24px 40px 0 24px;
+    position: relative;
+}
+
+.add-member-title-div>.editor-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+}
+
+.add-member-title-div>.add-member-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #F3F4F5;
+    line-height: 20px;
+    white-space: pre-wrap;
+}
+
+.add-member-wrapper>.add-member-name-div {
+    height: 110px;
+    padding: 0 24px;
+    margin-bottom: 10px;
+}
+
+.add-member-name-div>.add-member-error>.add-member-error-message{
+    display: none;
+    color: #F38688;
+    letter-spacing: 0.24px;
+    font-weight: 700;
+    font-size: 12px;
+    font-style: italic;
+    margin-bottom: 12px;
+}
+
+.add-member-name-div>.add-member-name-title {
+    font-size: 14px;
+    color: #c7c8ce;
+    font-weight: 400;
+    line-height: 18px;
+    margin-bottom: 12px;
+}
+
+.add-member-name-div>.add-member-input-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.add-member-name-div>.add-member-input-wrapper>.add-member-input {
+    padding: 10px;
+    height: 40px;
+    font-size: 16px;
+    width: 100%;
+    border-radius: 3px;
+    background-color: #1e1f22;
+    color: #e0e1e5;
+}
+
+.add-member-wrapper>.add-member-submit-div {
+    height: 65px;
+    padding: 24px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    background-color: #2b2d31;
+    border-radius: 0 0 5px 5px;
+}
+
+.add-member-submit-div>.add-member-submit-button {
+    height: 38px;
+    width: 96px;
+    padding: 2px 16px;
+    background-color: #5865F2;
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color .15s ease-out, color .15s ease-out;
+}
+
+.add-member-submit-div>.add-member-submit-button:hover {
+    background-color: #4752c4;
+}
+
+.add-member-submit-div>.forbidden:hover,
+.add-member-submit-div>.forbidden {
+    background-color: #61648e;
+    cursor: not-allowed;
+}
+
+.add-member-submit-button>.add-member-submit-text {
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 16px;
+    margin: 0 18px;
+    color: #FFF;
+}
+
+/* delete member */
+
+.delete-member-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    border-radius: 5px;
+    box-shadow: rgb(199 200 206 / 30%) 0px 0px 0px 1px;
+    background-color: #313338;
+    padding-bottom: 24px;
+    overflow: auto;
+    max-height: 95vh;
+}
+
+.delete-member-wrapper>.delete-member-title-div {
+    height: 60px;
+    padding: 24px 40px 0 24px;
+    position: relative;
+}
+
+.delete-member-title-div>.editor-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+}
+
+.delete-member-title-div>.delete-member-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #F3F4F5;
+    line-height: 20px;
+    white-space: pre-wrap;
+}
+
+.delete-member-wrapper>.delete-member-list{
+    margin: 12px 0;
+    padding: 0 24px;
+}
+
+.delete-member-element {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 5px 0;
+}
+
+.delete-member-element>img {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    background-color: #000;
+}
+
+.delete-member-element>div {
+    font-size: 16px;
+    font-weight: 500;
+    user-select: text;
+    margin: 0 15px;
+    user-select: none;
+}
+
+.delete-member-element>.delete-button {
+    height: 30px;
+    width: 70px;
+    padding: 2px 16px;
+    background-color: #a12829;
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color .15s ease-out, color .15s ease-out;
+    margin-left: auto;
+}
+
+.delete-member-element>.delete-button:hover {
+    background-color: #ed4245;
+}
+
+.delete-button>.delete-button-text {
+    font-weight: 500;
+    font-size: 14px;
+    margin: 0 18px;
+    color: #FFF;
+    pointer-events: none;
+}
+
+/* Leave Server */
+
+.leave-server-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: rgb(199 200 206 / 30%) 0px 0px 0px 1px;
+    width: 440px;
+    height: 200px;
+    border-radius: 5px;
+    background-color: #313338;
+}
+
+.leave-server-wrapper>.leave-server-title-div {
+    height: 56px;
+    padding: 16px;
+}
+
+.leave-server-title-div>.leave-server-title {
+    font-size: 20px;
+    color: #f3f4f5;
+    font-weight: 600;
+}
+
+.leave-server-wrapper>.leave-server-content{
+    height: 74px;
+    padding: 0 16px 20px;
+    font-size: 16px;
+    font-weight: 400;
+    color: #e0e1e5;
+    white-space: pre-wrap;
+    line-height: 20px;
+}
+
+.leave-server-wrapper>.leave-server-confirm-div{
+    height: 70px;
+    background-color: #2b2d31;
+    padding: 16px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.leave-server-confirm-div>.cancel-button {
+    width: 96px;
+    height: 38px;
+    padding: 2px 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cancel-button>.cancel-button-text {
+    font-size: 14px;
+    color: #FFF;
+}
+.cancel-button:hover>.cancel-button-text {
+    text-decoration: underline;
+}
+
+.leave-server-confirm-div>.leave-server-button {
+    width: 102px;
+    height: 38px;
+    padding: 2px 16px;
+    background-color: #da373c;
+    border-radius: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color .15s ease-out;
+    cursor: pointer;
+}
+.leave-server-confirm-div:hover>.leave-server-button {
+    background-color: #a12829;
+}
+
+.leave-server-button>.leave-server-button-text {
+    font-size: 14px;
+    color: #fff;
+    font-weight: 500;
+}
+
+.ownerIcon>path{
+    fill: #e8ac30;
+}
+
+/* channel */
 .arrow-down-icon-div {
     color: inherit;
 }

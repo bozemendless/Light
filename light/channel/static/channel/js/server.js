@@ -1,7 +1,10 @@
 const serverAPIUrl = "api/server";
+const serverMemberAPIUrl = "api/server/members";
 const serverArea = document.querySelector("#server-list");
 const serverLoadingStatus = {};
 const createServerBtn = document.querySelector("#create-server");
+const serverCreator = {};
+const serverMembers = {};
 
 // Load server list
 async function serverInit() {
@@ -40,6 +43,18 @@ async function loadingServerList(servers) {
             id: server.id,
             wrapper: wrappersWrapper,
         });
+
+        if (server.creator.id === userId) {
+            serverCreator[server.id] = true;
+        } else {
+            serverCreator[server.id] = false;
+        }
+
+        serverMembers[server.id] = {
+            name: server.name,
+            creator: server.creator.username,
+            member: server.members,
+        };
     });
 }
 
@@ -196,7 +211,6 @@ createServerBtn.addEventListener("click", () => {
             },
             body: JSON.stringify(info),
         };
-        console.log(options);
         const response = await fetch(serverAPIUrl, options);
         const data = await response.json();
         if (response.ok) {
