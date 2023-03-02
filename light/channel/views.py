@@ -29,21 +29,30 @@ def server(request):
                 del request.session['token']
                 if request.path != '/login':
                     return redirect('/login')
-            # try: # get user server list
-            account = Account.objects.get(id=decode_user_id)
-            servers = account.joined_groups.all()
-            res = {
-                'data':[
-                    {
-                        'id': str(server.id),
-                        'name': server.name, 
-                        'creator': server.creator.username,
-                        'members': [member.username for member in server.members.all()],
-                    }
-                    for server in servers
-                ] 
-            }
-            return JsonResponse(res)
+            if 'member_id' in request.GET:
+                pass
+            else:
+                # try: # get user server list
+                account = Account.objects.get(id=decode_user_id)
+                servers = account.joined_groups.all()
+                res = {
+                    'data':[
+                        {
+                            'id': str(server.id),
+                            'name': server.name, 
+                            'creator': {'username': server.creator.username,
+                                        'id': server.creator.id},
+                            'members': [
+                                {
+                                    'username': member.username,
+                                    'avatar': member.avatar.url if member.avatar else None
+                                }
+                                    for member in server.members.all()],
+                        }
+                        for server in servers
+                    ] 
+                }
+                return JsonResponse(res)
             # except:
             #     pass
         else: 
@@ -93,8 +102,122 @@ def server(request):
         else: 
             # token not in session
             return redirect('/login')
+def server_members(request):
+    # Add member to server
+    if request.method == 'POST':
+        # verify the token
+        if 'token' in request.session:
+            try: # get user id
+                user_token = request.session['token']
+                decode_token = jwt.decode(
+                user_token, jwt_secret_key, algorithms="HS256")
+                decode_user_id = decode_token['id']
+            except:
+                del request.session['token']
+                error = 'Failed to validate token.'
+                res = {
+                    'error': True, 
+                    'message': error,
+                }
+                return JsonResponse(res, status=401)
+
+            try:
+                infos = json.loads(request.body)
+                server_id = infos['server']
+                member_username = infos['member']
+                account = Account.objects.get(id=decode_user_id)
+                member = Account.objects.get(username=member_username)
+                server = Server.objects.get(id=server_id, creator=account)
+                if member in server.members.all():
+                    res = {
+                        'error': True,
+                        'message': 'Member already exists in the server',
+                    }
+                    return JsonResponse(res, status=400)
+                else:
+                    server.members.add(member)
+                    res = {
+                        'ok': True,
+                        'message': 'Member added successfully.',
+                    }
+                    return JsonResponse(res)
+            except Account.DoesNotExist:
+                error = 'The user is not existed'
+                res = {
+                    'error': True,
+                    'message': error,
+                }
+                return JsonResponse(res, status=400)
+            except :
+                error = 'Failed to add member'
+                res = {
+                    'error': True,
+                    'message': error,
+                }
+                return JsonResponse(res, status=400)
+        else: 
+            # token not in session
+            error = 'Failed to validate token.'
+            res = {
+                'error': True, 
+                'message': error,
+            }
+            return JsonResponse(res, status=401)
         
+    elif request.method == "DELETE":
+        if 'token' in request.session:
+            try: # get user id
+                user_token = request.session['token']
+                decode_token = jwt.decode(
+                    user_token, jwt_secret_key, algorithms="HS256")
+                decode_user_id = decode_token['id']
+            except:
+                del request.session['token']
+                error = 'Failed to validate token.'
+                res = {
+                    'error': True, 
+                    'message': error,
+                }
+                return JsonResponse(res, status=401)
 
+            try:
+                infos = json.loads(request.body)
+                server_id = infos['server']
+                member_username = infos['member']
+                account = Account.objects.get(id=decode_user_id) # requester
+                server = Server.objects.get(id=server_id)
+                member = Account.objects.get(username=member_username) # removed member
+                if (member != server.creator and account == member) or (member != server.creator and account == server.creator):
+                    
+                    # server.members.remove(member)
+                    res = {
+                        'ok': True,
+                        'message': 'Member removed successfully.',
+                    }
+                    return JsonResponse(res)
+                else:
+                    error = 'You are not authorized to remove this member.'
+                    res = {
+                        'error': True,
+                        'message': error,
+                    }
+                    return JsonResponse(res, status=401)
 
-def server_add_member(request):
-    pass
+            except:
+                error = 'Failed to remove member'
+                res = {
+                    'error': True,
+                    'message': error,
+                }
+                return JsonResponse(res, status=400)
+        else: 
+            # token not in session
+            error = 'Failed to validate token.'
+            res = {
+                'error': True, 
+                'message': error,
+            }
+            return JsonResponse(res, status=401)
+
+    else: # Method not allowed
+        return JsonResponse({}, status=405)
