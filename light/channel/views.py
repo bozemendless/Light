@@ -29,32 +29,51 @@ def server(request):
                 del request.session['token']
                 if request.path != '/login':
                     return redirect('/login')
-            if 'member_id' in request.GET:
-                pass
-            else:
-                # try: # get user server list
-                account = Account.objects.get(id=decode_user_id)
-                servers = account.joined_groups.all()
-                res = {
-                    'data':[
-                        {
-                            'id': str(server.id),
-                            'name': server.name, 
-                            'creator': {'username': server.creator.username,
-                                        'id': server.creator.id},
-                            'members': [
+            try:
+                if 'server_id' in request.GET:
+                    request_server = request.GET['server_id']
+                    account = Account.objects.get(id=decode_user_id)
+                    server = Server.objects.get(id=request_server)
+                    if server.members.filter(id=decode_user_id).exists():
+                        res = {
+                            'data': [
                                 {
-                                    'username': member.username,
-                                    'avatar': member.avatar.url if member.avatar else None
+                                    'id': str(server.id),
+                                    'name': server.name,
+                                    'creator': {'username': server.creator.username,
+                                                'id': server.creator.id},
+                                    'members': [{
+                                        'username': member.username,
+                                        'avatar': member.avatar.url if member.avatar else None,
+                                    } for member in server.members.all()]
                                 }
-                                    for member in server.members.all()],
+                            ]
                         }
-                        for server in servers
-                    ] 
-                }
-                return JsonResponse(res)
-            # except:
-            #     pass
+                        return JsonResponse(res)
+                else:
+                    # get user servers list
+                    account = Account.objects.get(id=decode_user_id)
+                    servers = account.joined_groups.all()
+                    res = {
+                        'data':[
+                            {
+                                'id': str(server.id),
+                                'name': server.name, 
+                                'creator': {'username': server.creator.username,
+                                            'id': server.creator.id},
+                                'members': [
+                                    {
+                                        'username': member.username,
+                                        'avatar': member.avatar.url if member.avatar else None
+                                    }
+                                        for member in server.members.all()],
+                            }
+                            for server in servers
+                        ] 
+                    }
+                    return JsonResponse(res)
+            except:
+                pass
         else: 
             # token not in session
             return redirect('/login')
@@ -102,9 +121,28 @@ def server(request):
         else: 
             # token not in session
             return redirect('/login')
+
+    else: # Method not allowed
+        return JsonResponse({}, status=405)
+
+
 def server_members(request):
+    if request.method == 'GET':
+        if 'member_username' in request.GET:
+            try:
+                member_username = request.GET['member_username']
+                member = Account.objects.get(username=member_username)
+                res = {
+                    'username': member.username,
+                    'avatar': member.avatar.url if member.avatar else None,
+                    'about_me': member.about_me,
+                }
+                return JsonResponse(res)
+            except Account.DoesNotExist:
+                return JsonResponse({})
+
     # Add member to server
-    if request.method == 'POST':
+    elif request.method == 'POST':
         # verify the token
         if 'token' in request.session:
             try: # get user id
@@ -189,7 +227,7 @@ def server_members(request):
                 member = Account.objects.get(username=member_username) # removed member
                 if (member != server.creator and account == member) or (member != server.creator and account == server.creator):
                     
-                    # server.members.remove(member)
+                    server.members.remove(member)
                     res = {
                         'ok': True,
                         'message': 'Member removed successfully.',
