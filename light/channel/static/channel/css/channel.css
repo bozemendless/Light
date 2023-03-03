@@ -686,6 +686,7 @@ main {
     align-items: center;
     width: 96px;
     height: 32px;
+    justify-content: flex-end;
 }
 
 .mute-button, .listen-button, .setting-button {
@@ -780,7 +781,11 @@ path {
     font-weight: 500;
     margin-right: 4px;
     line-height: 22px;
-    /* user-select: text; */
+    cursor: pointer;
+}
+
+.message-user:hover {
+    text-decoration: underline;
 }
 
 .message-time {
@@ -847,14 +852,15 @@ path {
 
 .videos {
     display: flex;
+    justify-content: center;
     align-items: center;
-    height: 100%;
+    height: calc(100vh - 50px - 72px - 16px);
     width: 100%;
+    flex-wrap: wrap;
 }
 
 .video-wrapper {
-    width: 100%;
-    max-width: 50%;
+    width: 45%;
     margin: 8px;
     aspect-ratio: 1.777794204612655/1;
     border-radius: 8px;
@@ -1112,6 +1118,14 @@ video:hover {
     display: none;
 }
 
+#me-server:hover {
+    background-color: #000;
+}
+
+#me-server:hover>svg>path {
+    fill: #FF5;
+}
+
 .server > svg {
     fill: inherit;
 }
@@ -1271,4 +1285,103 @@ video:hover {
     line-height: 16px;
     margin: 0 18px;
     color: #FFF;
+}
+
+
+.main-card {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    z-index: 1;
+}
+
+.main-card-profile-card {
+    width: 340px;
+    height: 331px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgb(0 0 0 / 24%);
+    background: #232428;
+    position: relative;
+    justify-content: space-between;
+}
+
+.main-card-profile-card>.main-card-decorator-bar {
+    height: 60px;
+    background-color: #747c8b;
+    border-radius: 8px 8px 0 0;
+}
+
+.main-card-profile-card>.main-card-avatar-wrapper {
+    position: absolute;
+    height: 94px;
+    width: 94px;
+    border-radius: 50%;
+    border-style: solid;
+    border-width: 6px;
+    border-color: #1e1f22;
+    left: 16px;
+    top: 11px;
+    overflow: hidden;
+}
+
+.main-card-user-background {
+    width: 308px;
+    height: 200px;
+    margin: 28px 16px 16px;
+    padding: 0 12px;
+    background-color: #111214;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-card-profile-card>.main-card-avatar-wrapper>img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    border-radius: 50%;
+    background-color: #000;
+}
+
+.main-card-user-background>.main-card-username-wrapper {
+    border-bottom: 1px solid rgba(78,80,88,0.48);
+}
+
+.main-card-user-background>.main-card-aboutme {
+    padding-top: 12px;
+}
+
+.main-card-user-background>.main-card-username-wrapper>.main-card-username {
+    height: 36px;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 24px;
+    color: #f3f4f5;
+    padding-top: 12px;
+    margin-bottom: 12px;
+    user-select: text;
+}
+
+.main-card-user-background>.main-card-aboutme>.main-card-aboutme-title {
+    line-height: 16px;
+    color: #f3f4f5;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.24px;
+    margin-bottom: 6px;
+}
+
+.main-card-user-background>.main-card-aboutme>.main-card-aboutme-content {
+    font-size: 14px;
+    color: #F3F4F5;
+    font-weight: 400;
+    line-height: 18px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    user-select: text;
+    overflow-y: auto;
+    max-height: 100px;
 }
