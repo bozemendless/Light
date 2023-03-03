@@ -1,4 +1,5 @@
 from .models import Account
+from channel.models import Server
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password, check_password
@@ -98,6 +99,10 @@ def register(request):
 
             account.save()
 
+            account = Account.objects.get(username=username)
+            light = Server.objects.get(id=1)
+            light.members.add(account)
+
             res = {
                 'ok': True
             }
@@ -123,17 +128,19 @@ def auth(request):
                 decode_token = jwt.decode(
                 user_token, jwt_secret_key, algorithms="HS256")
                 decode_user_id = decode_token['id']
-                account_set = Account.objects.filter(id=decode_user_id).values('username', 'email', 'avatar')
+                account_set = Account.objects.filter(id=decode_user_id).values('username', 'email', 'avatar', 'about_me')
                 if account_set:
                     username = account_set[0]['username']
                     email = account_set[0]['email']
                     avatar = '/media/' + account_set[0]['avatar'] if account_set[0]['avatar'] else None
+                    about_me = account_set[0]['about_me']
                 user_id = decode_token['id']
                 res = {
                     'id': user_id,
                     'username': username,
                     'email': email,
-                    'avatar': avatar
+                    'avatar': avatar,
+                    'about_me': about_me,
                 }
                 return JsonResponse(res)
             except:
@@ -400,3 +407,36 @@ def avatar(request):
 
         # # token not in session
         return redirect('/login')
+    
+def about_me(request):
+    if request.method == 'PATCH':
+        if 'token' in request.session:
+            try: # get user id
+                user_token = request.session['token']
+                decode_token = jwt.decode(
+                user_token, jwt_secret_key, algorithms="HS256")
+                decode_user_id = decode_token['id']
+            except:
+                del request.session['token']
+                error = 'Failed to validate token.'
+                res = {
+                    'error': True, 
+                    'message': error,
+                }
+                return JsonResponse(res, status=401)
+
+            try:
+                infos = json.loads(request.body.decode('utf-8'))
+                account = Account.objects.get(id=decode_user_id)
+                account.about_me = infos['aboutMe']
+                account.save()
+                res = {
+                    'ok': True,
+                }
+                return JsonResponse(res)
+            except:
+                error = 'Failed to update about me.'
+                res = {
+                    'error': True,
+                    'message': error,
+                }
