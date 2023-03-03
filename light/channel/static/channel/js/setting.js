@@ -4,6 +4,8 @@ const settingPage = document.querySelector(".setting-page");
 const exitBtn = document.querySelector(".exit");
 const authUrl = "/api/user/auth";
 const avatarUrl = "/api/user/avatar";
+const aboutMeUrl = "/api/user/about_me";
+const getMemberDataUrl = "/api/server/members";
 const token = document.getElementsByName("csrfmiddlewaretoken")[0].value;
 const editLayerHTML = `<div class="edit-layer" id="edit-layer"></div>`;
 const editUsernameHTML = `<div class="editor username-editor" id="username-editor">
@@ -446,12 +448,41 @@ async function removeAvatar() {
 
 // About me
 const aboutMe = document.querySelector("#aboutme");
+const aboutMeEditBtn = document.querySelector("#aboutme-edit-button");
 const aboutMePreview = document.querySelector(".preview-aboutme-content");
 aboutMe.addEventListener("input", () => {
     aboutMePreview.textContent = aboutMe.value;
+    aboutMePreview.scrollTop = aboutMePreview.scrollHeight;
+    if (aboutMe.value === aboutMeContent) {
+        aboutMeEditBtn.style.display = "none";
+    } else {
+        aboutMeEditBtn.style.display = "flex";
+    }
 });
 
-aboutMe.addEventListener("change", () => {
-    const aboutMeEditBtn = document.querySelector("#aboutme-edit-button");
-    aboutMeEditBtn.style.display = "flex";
+aboutMeEditBtn.addEventListener("click", () => {
+    if (aboutMe.value !== aboutMeContent) {
+        aboutMeEditBtn.style.display = "none";
+        saveAboutMe(aboutMe.value);
+    }
 });
+
+async function saveAboutMe(content) {
+    const info = { aboutMe: content };
+    const options = {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": token,
+        },
+        body: JSON.stringify(info),
+    };
+    const response = await fetch(aboutMeUrl, options);
+    const data = await response.json();
+    if (response.ok) {
+        console.log(data);
+        aboutMeContent = content;
+        alert("更新成功！");
+        updateAboutMe();
+    }
+}
