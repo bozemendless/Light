@@ -2,14 +2,16 @@
 let userId;
 let username;
 let email;
+let aboutMeContent;
 let avatar = null;
 let isSubmitting = false;
+let remote;
 
 // Websocket
 let isSocketConnect = false;
 let currentInChanneL;
 const channelMap = {};
-const webSocket = webSocketConnect();
+let webSocket;
 
 // P2P connection & WebRTC
 let peer;
@@ -32,6 +34,7 @@ const channelList = document.querySelector(".channel-list");
 const generalVideoChannel = document.querySelector("#general-video-channel");
 const hamburger = document.querySelector("#hamburger");
 const serverMenu = document.querySelector("#server-menu");
+const avatarWrapper = document.querySelector(".avatar-wrapper");
 
 // Functions
 function init() {
@@ -56,6 +59,7 @@ async function getUserData() {
     username = data.username;
     email = data.email;
     avatar = data.avatar;
+    aboutMeContent = data.about_me;
     if (!avatar) {
         updateAvatar("load", avatar);
     } else {
@@ -64,6 +68,7 @@ async function getUserData() {
 
     updateUsername(username);
     updateEmail(email);
+    updateAboutMe(aboutMeContent);
 }
 
 function updateUsername(newUsername) {
@@ -120,6 +125,11 @@ function updateAvatar(type, newAvatar) {
     settingAvatarImg.src = src;
 }
 
+function updateAboutMe() {
+    aboutMe.value = aboutMeContent;
+    aboutMePreview.textContent = aboutMeContent;
+}
+
 function createMyPeer() {
     // Get my peerId
     const peer = new Peer({
@@ -163,7 +173,6 @@ function switchChannel() {
 // Join Voice Channel
 function joinVoiceChannel(server) {
     const onePeopleVideo = document.querySelector(".one-people-video");
-    console.log(server);
     // Change my already in Channel Name
     currentInChanneL = "general-video-channel";
     createLocalStream();
@@ -471,15 +480,10 @@ function webSocketConnect() {
         // Listen to notifications
         if (parsedData.type === "notification") {
             if (parsedData.data.action === "channel_list") {
-                // console.log(parsedData.data.general_voice_channel);
-                // [{peer_username:peer_username, peer_channel_name: peer_channel_name}]
                 const members = parsedData.data.general_voice_channel;
                 showChannelMember("join_room", members);
             }
             if (parsedData.data.action === "join_room") {
-                // console.log(
-                //     `${parsedData.data.peer_username} 進入了語音頻道，他的 channel name 是 ${parsedData.data.peer_channel_name}`
-                // );
                 const members = [
                     {
                         peer_username: parsedData.data.peer_username,
@@ -490,10 +494,6 @@ function webSocketConnect() {
                 showChannelMember("join_room", members);
             }
             if (parsedData.data.action === "leave_room") {
-                //
-                // console.log(
-                //     `${parsedData.data.peer_username} 離開了語音頻道，他的 channel name 是 ${parsedData.data.peer_channel_name}`
-                // );
                 const members = [
                     {
                         peer_username: parsedData.data.peer_username,
@@ -727,6 +727,7 @@ In other words, if the remote peer doesn't turn on the camera, Chrome will keep 
     and there will be NO VOICE.
 */
 function createRemoteVideo(peerUsername) {
+    remote += 1;
     const videos = document.querySelector(".videos");
     const videoWrapper = document.createElement("div");
     const remoteVideo = document.createElement("video");
@@ -751,22 +752,32 @@ function createRemoteVideo(peerUsername) {
     videoWrapper.appendChild(channelPeerNameLabel);
     channelPeerNameLabel.textContent = peerUsername;
 
+    // size
+    videoResize();
     return { remoteVideo: remoteVideo, remoteAudio: remoteAudio };
 }
 
 // Delete Video
 function deleteVideo(video) {
+    remote -= 1;
     const videoWrapper = video.parentNode;
     if (videoWrapper) {
         videoWrapper.parentNode.removeChild(videoWrapper);
+        videoResize();
     }
     return;
 }
 
+async function getMemberData(username) {
+    const response = await fetch(
+        `${getMemberDataUrl}?member_username=${username}`
+    );
+    const data = response.json();
+    return data;
+}
+
 // Show channel member
 function showChannelMember(action, members) {
-    console.log(action, members);
-
     if (action === "join_room") {
         members.forEach((member) => {
             const voiceUserWrapper = document.createElement("div");
@@ -799,6 +810,31 @@ function showChannelMember(action, members) {
     }
 }
 
+function videoResize() {
+    const videoWrappers = document.querySelectorAll(".video-wrapper");
+    const numberOfVideoWrappers = videoWrappers.length - 1;
+    if (numberOfVideoWrappers === 1 || numberOfVideoWrappers === 2) {
+        videoWrappers.forEach((wrapper) => {
+            wrapper.style.width = "45%";
+        });
+    }
+    if (numberOfVideoWrappers === 3 || numberOfVideoWrappers === 4) {
+        videoWrappers.forEach((wrapper) => {
+            wrapper.style.width = "38%";
+        });
+    }
+    if (numberOfVideoWrappers === 5 || numberOfVideoWrappers === 6) {
+        videoWrappers.forEach((wrapper) => {
+            wrapper.style.width = "32%";
+        });
+    }
+    if (numberOfVideoWrappers === 7 || numberOfVideoWrappers === 8) {
+        videoWrappers.forEach((wrapper) => {
+            wrapper.style.width = "25%";
+        });
+    }
+}
+
 // Event Listener
 // 點擊了哪個頻道
 channelList.addEventListener("click", (event) => {
@@ -823,7 +859,17 @@ generalVideoChannel.addEventListener("click", () => {
         // been joined channel and the current channel cannot be the same
         if (currentInChanneL === clickedChannel) {
             console.log("already in this channel");
+            return;
         }
+        const numberOfVoiceUser = document
+            .querySelector(`#voice-channel-server-wrapper-${currentServerId}`)
+            .querySelectorAll(".voice-user-wrapper").length;
+        if (numberOfVoiceUser > 7) {
+            alert("頻道人數過多，請稍後再試");
+            location.reload();
+            return;
+        }
+
         if (currentInChanneL !== clickedChannel && peerId != null) {
             joinVoiceChannel(currentServerId);
         }
@@ -930,7 +976,6 @@ hamburger.addEventListener("click", () => {
             } else addMemberSubmitBtn.classList.remove("forbidden");
         });
         addMemberSubmitBtn.addEventListener("click", () => {
-            console.log(isSubmitting);
             if (isSubmitting) {
                 return;
             }
@@ -977,6 +1022,8 @@ hamburger.addEventListener("click", () => {
                 alert(`新增使用者 ${member} 成功！`);
                 editLayer.remove();
                 addMemberWrapper.remove();
+                const memberData = await getMemberData(member);
+                serverMembers[server].member.push(memberData);
             }
             isSubmitting = false;
         }
@@ -1026,11 +1073,11 @@ hamburger.addEventListener("click", () => {
                 </svg>
             </div>
         `;
+        deleteMemberList.insertAdjacentHTML("beforeend", deleteMemberElement);
         if (avatar) {
             const img = document.querySelector("#me-delete-img");
-            img.src = member.avatar;
+            img.src = avatar;
         }
-        deleteMemberList.insertAdjacentHTML("beforeend", deleteMemberElement);
         serverMembers[currentServerId].member.forEach((member) => {
             if (member.username === username) {
                 return;
@@ -1049,12 +1096,34 @@ hamburger.addEventListener("click", () => {
                 img.src = member.avatar;
             }
         });
-        deleteMemberList.addEventListener("click", (event) => {
+        deleteMemberList.addEventListener("click", async (event) => {
             if (event.target.className === "delete-button") {
-                deleteMember(
+                const deleteResult = await deleteMember(
                     currentServerId,
                     event.target.getAttribute("data-delete-button")
                 );
+                if (deleteResult) {
+                    alert(
+                        `移除使用者 ${event.target.getAttribute(
+                            "data-delete-button"
+                        )} 成功！`
+                    );
+                    // editLayer.remove();
+                    // deleteMemberWrapper.remove();
+                    const index = serverMembers[
+                        currentServerId
+                    ].member.findIndex(
+                        (member) =>
+                            member.username ===
+                            event.target.getAttribute("data-delete-button")
+                    );
+
+                    serverMembers[currentServerId].member.splice(index, 1);
+
+                    event.target.parentNode.parentNode.removeChild(
+                        event.target.parentNode
+                    );
+                }
             }
         });
 
@@ -1074,8 +1143,8 @@ hamburger.addEventListener("click", () => {
             };
             const response = await fetch(serverMemberAPIUrl, options);
             const data = await response.json();
-            console.log(data);
             isSubmitting = false;
+            return response.ok;
         }
     });
     leaveServerBtn.addEventListener("click", async () => {
@@ -1141,6 +1210,88 @@ hamburger.addEventListener("click", () => {
             }
             isSubmitting = false;
         }
+    });
+});
+
+messagesUlWrapper.addEventListener("click", async (event) => {
+    if (event.target.classList.contains("message-user")) {
+        const cardData = {};
+        if (event.target.classList[1] === username) {
+            cardData[username] = username;
+            cardData[avatar] = avatar;
+            cardData[aboutMe] = aboutMeContent;
+        } else {
+            const data = await getMemberData(event.target.classList[1]);
+            cardData[username] = data.username;
+            cardData[avatar] = data.avatar;
+            cardData[aboutMe] = data.about_me;
+        }
+        if (!cardData.avatar) {
+            cardData[avatar] = url;
+        }
+        const mainCardHTML = `
+        <div class="main-card" id="main-card">
+            <div class="main-card-profile-card">
+                <div class="main-card-decorator-bar"></div>
+                <div class="main-card-avatar-wrapper">
+                    <img id="main-card-avatar-img" src="${cardData[avatar]}">
+                </div>
+                <div class="main-card-user-background">
+                    <div class="main-card-username-wrapper">
+                        <div class="main-card-username" id="main-card-username">${cardData[username]}</div>
+                    </div>
+                    <div class="main-card-aboutme">
+                        <div class="main-card-aboutme-title">關於我</div>
+                        <div class="main-card-aboutme-content">${cardData[aboutMe]}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+        const cardLayerHTML = `<div class="menu-layer" id="menu-layer"></div>`;
+        main.insertAdjacentHTML("beforeend", cardLayerHTML + mainCardHTML);
+        const cardLayer = document.querySelector("#menu-layer");
+        const mainCard = document.querySelector("#main-card");
+        cardLayer.addEventListener("click", () => {
+            cardLayer.remove();
+            mainCard.remove();
+        });
+    }
+});
+
+avatarWrapper.addEventListener("click", () => {
+    let myAvatar;
+    if (!avatar) {
+        myAvatar = url;
+    } else {
+        myAvatar = avatar;
+    }
+    const mainCardHTML = `
+        <div class="main-card" id="main-card" style="bottom: 62px; top: unset; transform: unset; left: 52px">
+            <div class="main-card-profile-card">
+                <div class="main-card-decorator-bar"></div>
+                <div class="main-card-avatar-wrapper">
+                    <img id="main-card-avatar-img" src="${myAvatar}">
+                </div>
+                <div class="main-card-user-background">
+                    <div class="main-card-username-wrapper">
+                        <div class="main-card-username" id="main-card-username">${username}</div>
+                    </div>
+                    <div class="main-card-aboutme">
+                        <div class="main-card-aboutme-title">關於我</div>
+                        <div class="main-card-aboutme-content">${aboutMeContent}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+    const cardLayerHTML = `<div class="menu-layer" id="menu-layer"></div>`;
+    main.insertAdjacentHTML("beforeend", cardLayerHTML + mainCardHTML);
+    const cardLayer = document.querySelector("#menu-layer");
+    const mainCard = document.querySelector("#main-card");
+    cardLayer.addEventListener("click", () => {
+        cardLayer.remove();
+        mainCard.remove();
     });
 });
 

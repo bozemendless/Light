@@ -725,6 +725,8 @@ input:autofill { box-shadow: inset 0 0 0 2000px #e8f0fe; }
     word-wrap: break-word;
     white-space: pre-wrap;
     user-select: text;
+    overflow-y: auto;
+    max-height: 100px;
 }
 
 /* Avatar */
