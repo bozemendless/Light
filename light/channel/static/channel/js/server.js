@@ -3,6 +3,7 @@ const serverMemberAPIUrl = "api/server/members";
 const serverArea = document.querySelector("#server-list");
 const serverLoadingStatus = {};
 const createServerBtn = document.querySelector("#create-server");
+const messagesUlWrapper = document.querySelector("#messages");
 const serverCreator = {};
 const serverMembers = {};
 
@@ -97,7 +98,6 @@ function switchServer() {
                 const ulHTML = `
                 <ul class="message-list" id="message-list-${currentServerId}"></ul>
                 `;
-                const messagesUlWrapper = document.querySelector("#messages");
                 messagesUlWrapper.insertAdjacentHTML("beforeend", ulHTML);
                 const currentUl = document.querySelector(
                     `#message-list-${currentServerId}`
@@ -223,4 +223,6 @@ createServerBtn.addEventListener("click", () => {
     }
 });
 
-serverInit();
+serverInit().then(() => {
+    webSocket = webSocketConnect();
+});
