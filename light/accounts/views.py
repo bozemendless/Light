@@ -128,12 +128,11 @@ def auth(request):
                 decode_token = jwt.decode(
                 user_token, jwt_secret_key, algorithms="HS256")
                 decode_user_id = decode_token['id']
-                account_set = Account.objects.filter(id=decode_user_id).values('username', 'email', 'avatar', 'about_me')
-                if account_set:
-                    username = account_set[0]['username']
-                    email = account_set[0]['email']
-                    avatar = '/media/' + account_set[0]['avatar'] if account_set[0]['avatar'] else None
-                    about_me = account_set[0]['about_me']
+                account = Account.objects.get(id=decode_user_id)
+                username = account.username
+                email = account.email
+                avatar = account.avatar.url if account.avatar else None
+                about_me = account.about_me
                 user_id = decode_token['id']
                 res = {
                     'id': user_id,
