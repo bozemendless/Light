@@ -12,59 +12,77 @@
 </head>
 <body>
     <div class="container">
+        <div class="light-scrollbar">
+            <div class="my-area">
+                <div class="server-wrapper">
+                    <div class="server" id="me-server">
+                        <svg width="30" height="42" viewBox="0 0 61 51">
+                        <path d="M12.52 2.472C12.568 2.328 12.592 2.208 12.592 2.112C12.64 1.968 12.688 1.848 12.736 1.752H4.816C4.912 1.608 5.008 1.488 5.104 1.392C5.2 1.248 5.296 1.128 5.392 1.032H13.744C14.128 0.743998 14.536 0.599997 14.968 0.599997H29.368C29.896 0.599997 30.304 0.743998 30.592 1.032H22.24C22.336 1.128 22.432 1.248 22.528 1.392C22.672 1.488 22.768 1.608 22.816 1.752H30.664C30.76 2.04 30.808 2.28 30.808 2.472H34.84C34.888 2.472 34.912 2.496 34.912 2.544V3.192H25.192V4.632H29.224V5.712H28.792V7.152H26.2V8.592H32.032V8.952H32.464V10.392H32.752V11.832H32.248V13.272H31.888V15.072H33.112V16.512H31.744V17.952H32.032V18.312H37.144V19.752H39.808V20.472H28.72V21.192H32.392V22.632H29.368V24.072H31.96V24.792H32.464V25.872H42.112V26.592H48.808V28.032H30.52V26.592H23.824V25.872H14.176V24.792H13.672V24.072H11.08V22.632H14.104V21.192H10.432V20.472H21.52V19.752H18.856V18.312H13.744V17.952H13.456V16.512H14.824V15.072H13.6V13.272H13.96V11.832H14.464V10.392H14.176V8.952H13.744V8.592H7.912V7.152H10.504V5.712H10.936V4.632H6.904V3.192H16.624V2.472H12.52ZM60.4 41.352H40.744V41.712H42.184V42.792H52.408V43.152H49.24V44.592H54.28V45.672H55V46.032H54.496V46.392H54.28V47.832H54.424V48.912H54.136V49.272H53.776C53.728 49.368 53.704 49.488 53.704 49.632H54.496C54.352 50.112 54.088 50.472 53.704 50.712H52.912C52.672 50.904 52.336 51 51.904 51H15.616C15.184 51 14.848 50.904 14.608 50.712H15.328C14.896 50.472 14.608 50.112 14.464 49.632H13.672C13.672 49.536 13.648 49.464 13.6 49.416C13.6 49.368 13.6 49.32 13.6 49.272H13.96V48.912H14.248V47.832H14.104V46.392H14.32V46.032H14.824V45.672H14.104V44.592H9.064V43.152H12.232V42.792H2.008V41.712H0.567999V41.352H20.224V40.272H12.232V39.192H20.008V38.832H3.016V37.752H5.464V37.392H14.824V37.032H11.512V35.952H17.128V34.512H11.44V33.792H16.12V33.432H13.96V32.352H16.048V31.632H13.384V30.912H19.648V29.832H21.448V29.112H11.584V28.032H29.872V29.112H39.736V29.832H37.936V30.912H31.672V31.632H34.336V32.352H32.248V33.432H34.408V33.792H29.728V34.512H35.416V35.952H29.8V36.24H49.744C50.416 36.24 50.944 36.504 51.328 37.032H54.64L54.856 37.392H45.496L45.64 37.752H43.12C43.168 37.848 43.192 37.992 43.192 38.184V38.832H60.184V39.192H52.408V40.272H60.4V41.352Z" fill="black" />
+                        </svg>
+                    </div>
+                    <div class="pill"></div>
+                </div>
+            </div>
+            <div class="server-separator"></div>
+            <div class="server-area" id="server-list">
+            </div>
+            <div class="server-area">
+                <div class="server-wrapper">
+                    <div class="create-server pointer" id="create-server">
+                        <svg class="circleIcon-3489FI" width="24" height="24" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M20 11.1111H12.8889V4H11.1111V11.1111H4V12.8889H11.1111V20H12.8889V12.8889H20V11.1111Z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="sidebar">
             <div class="searchBar">
             </div>
             <div class="channel-list">
-                <div class="channel-name">
-                Test_channel
+                <div class="channel-name" id="hamburger">
+                    <div class="channel-name-text" id="channel-name">Light</div>
+                    <div class="hamburger">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
                 </div>
                 <div class="text-channel channel-type">
-                    <div class="text-channel-label channel-label pointer">
+                    <div class="text-channel-label channel-label">
                         <div class="arrow-down-icon-div">
                             <svg class="arrow-down-icon" width="12" height="12" viewBox="0 0 24 24"><path fill="currentColor" d="M16.59 8.59004L12 13.17L7.41 8.59004L6 10L12 16L18 10L16.59 8.59004Z"></path></svg>
                         </div>
                         <div class="text-channel-label-text">文字頻道</div>
                     </div>
                     <div class="channel-name-label channel-active" id="general-chat-channel">
-                        <svg width="20" height="20" viewBox="0 0 24 24" class="icon-pound" x="0" y="0" aria-hidden="true" role="img">
-                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z"></path>
+                        <svg width="20" height="20" viewBox="0 0 24 24" class="icon-pound" >
+                            <path fill="currentColor" d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z" />
                         </svg> 
                         一般
                     </div> 
                 </div>
                 <div class="voice-channel channel-type">
-                    <div class="voice-channel-label channel-label pointer">
+                    <div class="voice-channel-label channel-label">
                         <div class="arrow-down-icon-div">
-                            <svg class="arrow-down-icon" width="12" height="12" viewBox="0 0 24 24"><path fill="currentColor" d="M16.59 8.59004L12 13.17L7.41 8.59004L6 10L12 16L18 10L16.59 8.59004Z"></path></svg>
+                            <svg class="arrow-down-icon" width="12" height="12" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M16.59 8.59004L12 13.17L7.41 8.59004L6 10L12 16L18 10L16.59 8.59004Z" />
+                            </svg>
                         </div>
                         <div class="voice-channel-label-text">語音頻道</div>
                     </div>
                     <div class="channel-name-label" id="general-video-channel">
-                        <svg class="icon-2W8DHg" aria-hidden="true" role="img" width="20" height="20" viewBox="0 0 24 24">
-                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M11.383 3.07904C11.009 2.92504 10.579 3.01004 10.293 3.29604L6 8.00204H3C2.45 8.00204 2 8.45304 2 9.00204V15.002C2 15.552 2.45 16.002 3 16.002H6L10.293 20.71C10.579 20.996 11.009 21.082 11.383 20.927C11.757 20.772 12 20.407 12 20.002V4.00204C12 3.59904 11.757 3.23204 11.383 3.07904ZM14 5.00195V7.00195C16.757 7.00195 19 9.24595 19 12.002C19 14.759 16.757 17.002 14 17.002V19.002C17.86 19.002 21 15.863 21 12.002C21 8.14295 17.86 5.00195 14 5.00195ZM14 9.00195C15.654 9.00195 17 10.349 17 12.002C17 13.657 15.654 15.002 14 15.002V13.002C14.551 13.002 15 12.553 15 12.002C15 11.451 14.551 11.002 14 11.002V9.00195Z" aria-hidden="true"></path>
+                        <svg class="icon-2W8DHg" width="20" height="20" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M11.383 3.07904C11.009 2.92504 10.579 3.01004 10.293 3.29604L6 8.00204H3C2.45 8.00204 2 8.45304 2 9.00204V15.002C2 15.552 2.45 16.002 3 16.002H6L10.293 20.71C10.579 20.996 11.009 21.082 11.383 20.927C11.757 20.772 12 20.407 12 20.002V4.00204C12 3.59904 11.757 3.23204 11.383 3.07904ZM14 5.00195V7.00195C16.757 7.00195 19 9.24595 19 12.002C19 14.759 16.757 17.002 14 17.002V19.002C17.86 19.002 21 15.863 21 12.002C21 8.14295 17.86 5.00195 14 5.00195ZM14 9.00195C15.654 9.00195 17 10.349 17 12.002C17 13.657 15.654 15.002 14 15.002V13.002C14.551 13.002 15 12.553 15 12.002C15 11.451 14.551 11.002 14 11.002V9.00195Z" />
                         </svg>
                         一般
-                        
                     </div>
-                    <!-- <div class="voice-user-wrapper">
-                        <div class="voice-user">
-                            <div class="voice-user-avatar"></div>
-                            <div class="voice-username">使用者</div>
-                        </div>
-                    </div>
-                    <div class="voice-user-wrapper">
-                        <div class="voice-user">
-                            <div class="voice-user-avatar"></div>
-                            <div class="voice-username">使用者2</div>
-                        </div>
-                    </div> -->
                 </div>
             </div>
             <div class="setting">
                 <div class="avatar-wrapper pointer">
                     <div class="avatar">
-                        <img src="{% static 'channel/imgs/default_avatar-32x32.png' %}" alt="" />
+                        <img id="avatar" alt="" />
                     </div>
                     <div class="name-tag">
                         <div class="username-container"></div>
@@ -72,13 +90,18 @@
                 </div>
                 <div class="control-buttons">
                     <div class="mute-button">
-                        <svg width="20" height="20" viewBox="0 0 24 24" id="setting-mute-svg"><path d="M6.7 11H5C5 12.19 5.34 13.3 5.9 14.28L7.13 13.05C6.86 12.43 6.7 11.74 6.7 11Z" fill="currentColor"></path><path d="M9.01 11.085C9.015 11.1125 9.02 11.14 9.02 11.17L15 5.18V5C15 3.34 13.66 2 12 2C10.34 2 9 3.34 9 5V11C9 11.03 9.005 11.0575 9.01 11.085Z" fill="currentColor"></path><path d="M11.7237 16.0927L10.9632 16.8531L10.2533 17.5688C10.4978 17.633 10.747 17.6839 11 17.72V22H13V17.72C16.28 17.23 19 14.41 19 11H17.3C17.3 14 14.76 16.1 12 16.1C11.9076 16.1 11.8155 16.0975 11.7237 16.0927Z" fill="currentColor"></path><path d="M21 4.27L19.73 3L3 19.73L4.27 21L8.46 16.82L9.69 15.58L11.35 13.92L14.99 10.28L21 4.27Z" class="strikethrough" fill="#ed4245"></path></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" id="setting-mute-svg" style="display: inline;">
+                            <path d="M6.7 11H5C5 12.19 5.34 13.3 5.9 14.28L7.13 13.05C6.86 12.43 6.7 11.74 6.7 11Z" fill="currentColor" />
+                            <path d="M9.01 11.085C9.015 11.1125 9.02 11.14 9.02 11.17L15 5.18V5C15 3.34 13.66 2 12 2C10.34 2 9 3.34 9 5V11C9 11.03 9.005 11.0575 9.01 11.085Z" fill="currentColor" />
+                            <path d="M11.7237 16.0927L10.9632 16.8531L10.2533 17.5688C10.4978 17.633 10.747 17.6839 11 17.72V22H13V17.72C16.28 17.23 19 14.41 19 11H17.3C17.3 14 14.76 16.1 12 16.1C11.9076 16.1 11.8155 16.0975 11.7237 16.0927Z" fill="currentColor" />
+                            <path d="M21 4.27L19.73 3L3 19.73L4.27 21L8.46 16.82L9.69 15.58L11.35 13.92L14.99 10.28L21 4.27Z" class="strikethrough" fill="#ed4245" />
+                        </svg>
                         <svg width="20" height="20" viewBox="0 0 24 24" id="setting-unmute-svg" style="display: none;">
-                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V21H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1ZM12 4C11.2 4 11 4.66667 11 5V11C11 11.3333 11.2 12 12 12C12.8 12 13 11.3333 13 11V5C13 4.66667 12.8 4 12 4Z" fill="currentColor"></path>
-                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V22H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1Z" fill="currentColor"></path>
+                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V21H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1ZM12 4C11.2 4 11 4.66667 11 5V11C11 11.3333 11.2 12 12 12C12.8 12 13 11.3333 13 11V5C13 4.66667 12.8 4 12 4Z" fill="currentColor" />
+                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V22H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1Z" fill="currentColor" />
                         </svg>
                     </div>
-                    <div class="listen-button">
+                    <div class="listen-button" style="display:none;">
                         <svg width="20" height="20" viewBox="0 0 24 24"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2.00305C6.486 2.00305 2 6.48805 2 12.0031V20.0031C2 21.1071 2.895 22.0031 4 22.0031H6C7.104 22.0031 8 21.1071 8 20.0031V17.0031C8 15.8991 7.104 15.0031 6 15.0031H4V12.0031C4 7.59105 7.589 4.00305 12 4.00305C16.411 4.00305 20 7.59105 20 12.0031V15.0031H18C16.896 15.0031 16 15.8991 16 17.0031V20.0031C16 21.1071 16.896 22.0031 18 22.0031H20C21.104 22.0031 22 21.1071 22 20.0031V12.0031C22 6.48805 17.514 2.00305 12 2.00305Z" fill="currentColor"></path></svg></svg>
                     </div>
                     <div class="setting-button pointer">
@@ -92,7 +115,9 @@
                 <div class="name-block">
                     <div class="label-channel-name-div">
                         <div class="label-channel-name-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" class="icon-pound" x="0" y="0" aria-hidden="true" role="img"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z"></path></svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" class="icon-pound" x="0" y="0" >
+                                <path fill="currentColor" d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z" />
+                            </svg>
                         </div>
                         <div class="label-channel-name-text">一般</div>
                         
@@ -103,7 +128,6 @@
                 <div class="chat">
                     <div class="messages-wrapper">
                         <div id="messages">
-                            <ul class="message-list" id="message-list"></ul>
                         </div>
 
                     </div>
@@ -131,20 +155,26 @@
                         </div>
                         <div class="toggles">
                             <div class="camera-button-wrapper voice-button-wrapper pointer" id="camera-btn">
-                                <button type="button" ><div><svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M21.526 8.149C21.231 7.966 20.862 7.951 20.553 8.105L18 9.382V7C18 5.897 17.103 5 16 5H4C2.897 5 2 5.897 2 7V17C2 18.104 2.897 19 4 19H16C17.103 19 18 18.104 18 17V14.618L20.553 15.894C20.694 15.965 20.847 16 21 16C21.183 16 21.365 15.949 21.526 15.851C21.82 15.668 22 15.347 22 15V9C22 8.653 21.82 8.332 21.526 8.149Z"></path></svg></div></button>
+                                <button type="button" >
+                                    <div>
+                                        <svg width="24" height="24" viewBox="0 0 24 24">
+                                            <path fill="currentColor" d="M21.526 8.149C21.231 7.966 20.862 7.951 20.553 8.105L18 9.382V7C18 5.897 17.103 5 16 5H4C2.897 5 2 5.897 2 7V17C2 18.104 2.897 19 4 19H16C17.103 19 18 18.104 18 17V14.618L20.553 15.894C20.694 15.965 20.847 16 21 16C21.183 16 21.365 15.949 21.526 15.851C21.82 15.668 22 15.347 22 15V9C22 8.653 21.82 8.332 21.526 8.149Z" />
+                                        </svg>
+                                    </div>
+                                </button>
                             </div>
                             <div class="audio-button-wrapper voice-button-wrapper pointer" id="audio-btn">
                                 <button type="button" >
                                     <div>
                                         <svg width="24" height="24" viewBox="0 0 24 24" id="audio-off-svg">
-                                            <path d="M6.7 11H5C5 12.19 5.34 13.3 5.9 14.28L7.13 13.05C6.86 12.43 6.7 11.74 6.7 11Z" fill="currentColor"></path>
-                                            <path d="M9.01 11.085C9.015 11.1125 9.02 11.14 9.02 11.17L15 5.18V5C15 3.34 13.66 2 12 2C10.34 2 9 3.34 9 5V11C9 11.03 9.005 11.0575 9.01 11.085Z" fill="currentColor"></path>
-                                            <path d="M11.7237 16.0927L10.9632 16.8531L10.2533 17.5688C10.4978 17.633 10.747 17.6839 11 17.72V22H13V17.72C16.28 17.23 19 14.41 19 11H17.3C17.3 14 14.76 16.1 12 16.1C11.9076 16.1 11.8155 16.0975 11.7237 16.0927Z" fill="currentColor"></path>
-                                            <path d="M21 4.27L19.73 3L3 19.73L4.27 21L8.46 16.82L9.69 15.58L11.35 13.92L14.99 10.28L21 4.27Z" class="strikethrough" id="strikethrough"></path>
+                                            <path d="M6.7 11H5C5 12.19 5.34 13.3 5.9 14.28L7.13 13.05C6.86 12.43 6.7 11.74 6.7 11Z" fill="currentColor" />
+                                            <path d="M9.01 11.085C9.015 11.1125 9.02 11.14 9.02 11.17L15 5.18V5C15 3.34 13.66 2 12 2C10.34 2 9 3.34 9 5V11C9 11.03 9.005 11.0575 9.01 11.085Z" fill="currentColor" />
+                                            <path d="M11.7237 16.0927L10.9632 16.8531L10.2533 17.5688C10.4978 17.633 10.747 17.6839 11 17.72V22H13V17.72C16.28 17.23 19 14.41 19 11H17.3C17.3 14 14.76 16.1 12 16.1C11.9076 16.1 11.8155 16.0975 11.7237 16.0927Z" fill="currentColor" />
+                                            <path d="M21 4.27L19.73 3L3 19.73L4.27 21L8.46 16.82L9.69 15.58L11.35 13.92L14.99 10.28L21 4.27Z" class="strikethrough" id="strikethrough" />
                                         </svg>
                                         <svg width="24" height="24" viewBox="0 0 24 24" id="audio-on-svg" style="display: none;">
-                                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V21H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1ZM12 4C11.2 4 11 4.66667 11 5V11C11 11.3333 11.2 12 12 12C12.8 12 13 11.3333 13 11V5C13 4.66667 12.8 4 12 4Z" fill="currentColor"></path>
-                                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V22H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1Z" fill="currentColor"></path>
+                                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V21H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1ZM12 4C11.2 4 11 4.66667 11 5V11C11 11.3333 11.2 12 12 12C12.8 12 13 11.3333 13 11V5C13 4.66667 12.8 4 12 4Z" fill="currentColor" />
+                                            <path d="M14.99 11C14.99 12.66 13.66 14 12 14C10.34 14 9 12.66 9 11V5C9 3.34 10.34 2 12 2C13.66 2 15 3.34 15 5L14.99 11ZM12 16.1C14.76 16.1 17.3 14 17.3 11H19C19 14.42 16.28 17.24 13 17.72V22H11V17.72C7.72 17.23 5 14.41 5 11H6.7C6.7 14 9.24 16.1 12 16.1Z" fill="currentColor" />
                                         </svg>
                                     </div>
                                 </button>
@@ -152,15 +182,15 @@
                             <div class="leave-button-wrapper voice-button-wrapper pointer" id="leave-btn">
                                 <button type="button">
                                     <div>
-                                        <svg id="leave-svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M21.1169 1.11603L22.8839 2.88403L19.7679 6.00003L22.8839 9.11603L21.1169 10.884L17.9999 7.76803L14.8839 10.884L13.1169 9.11603L16.2329 6.00003L13.1169 2.88403L14.8839 1.11603L17.9999 4.23203L21.1169 1.11603ZM18 22H13C6.925 22 2 17.075 2 11V6C2 5.447 2.448 5 3 5H7C7.553 5 8 5.447 8 6V10C8 10.553 7.553 11 7 11H6C6.063 14.938 9 18 13 18V17C13 16.447 13.447 16 14 16H18C18.553 16 19 16.447 19 17V21C19 21.553 18.553 22 18 22Z"></path></svg>
+                                        <svg id="leave-svg" width="24" height="24" viewBox="0 0 24 24">
+                                            <path fill="currentColor" d="M21.1169 1.11603L22.8839 2.88403L19.7679 6.00003L22.8839 9.11603L21.1169 10.884L17.9999 7.76803L14.8839 10.884L13.1169 9.11603L16.2329 6.00003L13.1169 2.88403L14.8839 1.11603L17.9999 4.23203L21.1169 1.11603ZM18 22H13C6.925 22 2 17.075 2 11V6C2 5.447 2.448 5 3 5H7C7.553 5 8 5.447 8 6V10C8 10.553 7.553 11 7 11H6C6.063 14.938 9 18 13 18V17C13 16.447 13.447 16 14 16H18C18.553 16 19 16.447 19 17V21C19 21.553 18.553 22 18 22Z" />
+                                        </svg>
                                     </div>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                
             </div>
             <div class="setting-page" style="display: none;">
                 <nav class="side-bar">
@@ -173,7 +203,9 @@
                         </div>
                         <div class="session-2">
                             <div class="setting-list" id="logout">登出
-                                <svg aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M18 2H7C5.897 2 5 2.898 5 4V11H12.59L10.293 8.708L11.706 7.292L16.414 11.991L11.708 16.706L10.292 15.294L12.582 13H5V20C5 21.103 5.897 22 7 22H18C19.103 22 20 21.103 20 20V4C20 2.898 19.103 2 18 2Z"></path></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M18 2H7C5.897 2 5 2.898 5 4V11H12.59L10.293 8.708L11.706 7.292L16.414 11.991L11.708 16.706L10.292 15.294L12.582 13H5V20C5 21.103 5.897 22 7 22H18C19.103 22 20 21.103 20 20V4C20 2.898 19.103 2 18 2Z" />
+                                </svg>
                             </div>
                             <div class="separator" id="separator2"></div>
                             <div class="social-link">
@@ -184,7 +216,6 @@
                                         </svg>
                                     </div>
                                 </a>   
-                                
                             </div>
                         </div>
                     </div>
@@ -199,7 +230,7 @@
                                 <div class="decorator-bar"></div>
                                 <div class="user-info-region">
                                     <div class="setting-avatar-wrapper">
-                                        <img src="{% static 'channel/imgs/default_avatar-512x512.png' %}">
+                                        <img id="setting-avatar-img">
                                     </div>
                                     <div class="username" id="card-username"></div>
                                     <div class="edit-info pointer" id="edit-info-button">
@@ -227,7 +258,7 @@
                                         <div class="user-info-background-edit pointer" id="edit-email-button">
                                             <div class="user-info-background-edit-button">編輯</div>
                                         </div>
-                                        
+
                                     </div>
                                 </div>
                             </div>
@@ -238,15 +269,22 @@
                             <div class="setting-page-title">個人資料</div>
                             <div class="tab-bar">
                                 <div class="tab-bar-item tab-bar-item-active">使用者個人資料</div>
-                                <div class="tab-bar-item">伺服器個人資料</div>
+                                {% comment %} <div class="tab-bar-item">伺服器個人資料</div> {% endcomment %}
                             </div>
                             <div class="profile-customization-sections">
                                 <div class="profile-customization-editor profile-customization-session">
                                     <div class="customization-session avatar-customization-session">
                                         <div class="h3-title">頭像</div>
-                                        <div class="avatar-editor-button" id="avatar-editor-button">
-                                            <div class="avatar-editor">
-                                                變更頭像
+                                        <div class="avatar-editor-buttons-wrapper">
+                                            <div class="avatar-editor-button pointer" id="avatar-editor-button">
+                                                <div class="avatar-editor">
+                                                    變更頭像
+                                                </div>
+                                            </div>
+                                            <div class="avatar-remove-button pointer" id="avatar-remove-button">
+                                                <div class="remove-editor">
+                                                    移除頭像
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -254,7 +292,10 @@
                                     <div class="customization-session aboutme-customization-session">
                                         <div class="h3-title">關於我</div>
                                         <div class="aboutme-wrapper">
-                                            <textarea id="aboutme" cols="30" rows="5"></textarea>
+                                            <textarea id="aboutme" cols="30" rows="5" maxlength="80"></textarea>
+                                        </div>
+                                        <div class="editor-confirm-div pointer" id="aboutme-edit-button">
+                                            <div class="editor-confirm-button">儲存變更</div>
                                         </div>
                                     </div>
                                     
@@ -264,7 +305,7 @@
                                     <div class="preview-profile-card">
                                         <div class="preview-decorator-bar"></div>
                                         <div class="preview-avatar-wrapper">
-                                            <img src="/static/channel/imgs/default_avatar-512x512.png">
+                                            <img id="preview-avatar-img">
                                         </div>
                                         <div class="preview-user-background">
                                             <div class="preview-username-wrapper">
@@ -295,14 +336,19 @@
                     
                 </div>
             </div>
+            <div id="preload">
+                <img src="{% static 'channel/imgs/Ripple-2s-243px.gif' %}" alt="">
+            </div>
 
         </main>
     </div>
-    <script>const url = "{% static 'channel/imgs/default_avatar-32x32.png' %}";</script>
+    <script>const url = "{% static 'channel/imgs/default_avatar-512x512.png' %}";</script>
     <script>const streamAvatarUrl = "{% static 'channel/imgs/default_avatar-512x512.png' %}";</script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script src="{% static 'channel/js/server.js' %}"></script>
     <script src="{% static 'channel/js/channel.js' %}"></script>
     <script src="{% static 'channel/js/setting.js' %}"></script>
+    
 
 </body>
 </html>

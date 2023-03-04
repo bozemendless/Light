@@ -171,3 +171,7 @@ form input {
 .agree > span {
     font-size: 12px;
 }
+
+.forget-password {
+    visibility: hidden;
+}

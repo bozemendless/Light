@@ -13,4 +13,7 @@ urlpatterns = [
     path('admin', admin.site.urls),
 ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Add static files URL patterns
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

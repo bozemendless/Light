@@ -11,25 +11,24 @@ database = os.getenv('RDS_DB_NAME')
 port = os.getenv('RDS_DB_PORT')
 docker_gateway = os.getenv('DOCKER_GATEWAY')
 
-# access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
-# secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
-# storage_bucket_name = os.getenv('AWS_STORAGE_BUCKET_NAME')
+access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+storage_bucket_name = os.getenv('AWS_STORAGE_BUCKET_NAME')
+cdn_domain_name = os.getenv('AWS_CUSTOM_DOMAIN')
+static_url = os.getenv('CDN_STATIC_URL')
 
 secret_key = os.getenv('SECRET_KEY')
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = secret_key
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1','localhost','shichenx.com']
 
+
 # CORS
-# CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1',
     'http://localhost',
@@ -37,16 +36,20 @@ CORS_ALLOWED_ORIGINS = [
     'http://shichenx.com',
 ]
 
+
 # CSRF Token
+
 CSRF_COOKIE_DOMAIN = '.shichenx.com'
 CSRF_TRUSTED_ORIGINS = [
     'https://*.shichenx.com'
 ]
 
+
 # Application definition
 
+
 INSTALLED_APPS = [
-    "daphne",
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -93,7 +96,6 @@ WSGI_APPLICATION = 'light.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
@@ -109,8 +111,19 @@ DATABASES = {
     }
 }
 
+
+# S3 settings
+
+AWS_ACCESS_KEY_ID = access_key_id
+AWS_SECRET_ACCESS_KEY = secret_access_key
+AWS_STORAGE_BUCKET_NAME = storage_bucket_name
+AWS_S3_CUSTOM_DOMAIN = cdn_domain_name
+AWS_S3_FILE_OVERWRITE = True
+AWS_DEFAULT_ACL = None
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+
 # Password validation
-# https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     # {
@@ -129,7 +142,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/4.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -141,36 +153,32 @@ USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+# STATIC_URL = 'static/'
+STATIC_URL = static_url
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR, 'static'),
     ]
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # ASGI
+
 ASGI_APPLICATION = 'light.asgi.application'
 
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {
-#             "hosts": [("127.0.0.1", 6379)],
-#         },
-#     },
-# }
-
 CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [(docker_gateway, 6379)],
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [(docker_gateway, 6379)],
         },
     },
 }
