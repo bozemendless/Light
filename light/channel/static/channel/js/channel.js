@@ -1217,32 +1217,32 @@ messagesUlWrapper.addEventListener("click", async (event) => {
     if (event.target.classList.contains("message-user")) {
         const cardData = {};
         if (event.target.classList[1] === username) {
-            cardData[username] = username;
-            cardData[avatar] = avatar;
-            cardData[aboutMe] = aboutMeContent;
+            cardData.username = username;
+            cardData.avatar = avatar;
+            cardData.aboutMe = aboutMeContent;
         } else {
             const data = await getMemberData(event.target.classList[1]);
-            cardData[username] = data.username;
-            cardData[avatar] = data.avatar;
-            cardData[aboutMe] = data.about_me;
+            cardData.username = data.username;
+            cardData.avatar = data.avatar;
+            cardData.aboutMe = data.about_me;
         }
         if (!cardData.avatar) {
-            cardData[avatar] = url;
+            cardData.avatar = url;
         }
         const mainCardHTML = `
         <div class="main-card" id="main-card">
             <div class="main-card-profile-card">
                 <div class="main-card-decorator-bar"></div>
                 <div class="main-card-avatar-wrapper">
-                    <img id="main-card-avatar-img" src="${cardData[avatar]}">
+                    <img id="main-card-avatar-img" src="${cardData.avatar}">
                 </div>
                 <div class="main-card-user-background">
                     <div class="main-card-username-wrapper">
-                        <div class="main-card-username" id="main-card-username">${cardData[username]}</div>
+                        <div class="main-card-username" id="main-card-username">${cardData.username}</div>
                     </div>
                     <div class="main-card-aboutme">
                         <div class="main-card-aboutme-title">關於我</div>
-                        <div class="main-card-aboutme-content">${cardData[aboutMe]}</div>
+                        <div class="main-card-aboutme-content">${cardData.aboutMe}</div>
                     </div>
                 </div>
             </div>
