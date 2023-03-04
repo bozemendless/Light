@@ -9,7 +9,7 @@ Demo link: https://shichenx.com
 - WebSocket
 - WebRTC (getUserMedia, RTCPeerConnection, RTCDataChannel)
 
-## Software Structure
+## Architecture
 ![Light drawio3](https://user-images.githubusercontent.com/98375601/222913079-d914db04-9ef7-4bc3-a96e-a4b6a0630133.png)
 
 
