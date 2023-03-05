@@ -3,11 +3,25 @@
 
 Demo link: https://shichenx.com
 
-## Main used technology
-- Django
-- Django Channels
+## Main Technique
+### Frontend
+- HTML
+- CSS
+- JavaScript
 - WebSocket
-- WebRTC (getUserMedia, RTCPeerConnection, RTCDataChannel)
+- Peer.JS (P2P & WebRTC)
+- WebRTC
+
+### Backend
+- Django
+- Django Channels (ASGI)
+- Nginx
+- Docker
+- Redis
+- AWS EC2
+- AWS S3
+- AWS RDS (MySQL)
+- AWS CloudFront
 
 ## Architecture
 ![Light drawio (2)](https://user-images.githubusercontent.com/98375601/222950372-6c0373b2-070e-4b53-92a1-77d8ff6077d0.png)
