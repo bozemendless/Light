@@ -1,5 +1,5 @@
 ﻿# Light
-`Light is a community-oriented instant messaging platform inspired by Discord's design. It allows members to create servers and chat channels freely and communicate via messages, video, and audio.`
+`Light is a community-oriented instant messaging platform inspired by Discord's design. It allows members to create servers and communicate in channel of each server freely via messages, video, and audio.`
 
 Demo link: https://shichenx.com
 
@@ -10,7 +10,10 @@ Demo link: https://shichenx.com
 - WebRTC (getUserMedia, RTCPeerConnection, RTCDataChannel)
 
 ## Architecture
-![Light drawio3](https://user-images.githubusercontent.com/98375601/222913079-d914db04-9ef7-4bc3-a96e-a4b6a0630133.png)
+![Light drawio (2)](https://user-images.githubusercontent.com/98375601/222950372-6c0373b2-070e-4b53-92a1-77d8ff6077d0.png)
+
+![Light_websocket drawio](https://user-images.githubusercontent.com/98375601/222950263-fbf8fcdb-940b-41cf-9e33-66b770f0a33d.png)
+
 
 
 ## Database ER Diagram
