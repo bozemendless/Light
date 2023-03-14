@@ -1,27 +1,52 @@
 ﻿# Light
-`Light is a community-oriented instant messaging platform inspired by Discord's design. It allows members to create servers and communicate in channel of each server freely via messages, video, and audio.`
+ 
+Light is a community-oriented instant messaging platform inspired by Discord's design. It allows members to create servers and communicate in channel of each server freely via messages, video, and audio. 
 
-Demo link: https://shichenx.com
+Visit the website at https://shichenx.com/
+
+![shichenx com_ (2)](https://user-images.githubusercontent.com/98375601/225050405-9784ec7c-a28a-4225-983b-33dd56ad8ade.png)
+
+## Main Freatures
+- Use Django as server framework.
+- Use Django Channels as support of WebSocket (ASGI) to achieve real-time chat.
+- Use WebRTC to achieve voice and video chat.
+- Deploy the website by Docker.
+- Store static files and uploaded media from user by AWS S3 and speed up distribution of static files by CloudFront.
+- Authenticate user with JSON Web Token.
+- Use Django ORM with AWS RDS for MySQL and normalize database in 3NF.
+- Use unit tests to ensure the correctness and robustness.
 
 ## Main Technique
-### Frontend
+### Back-End
+- Python Django
+- Python Django Channels (ASGI)
+- RESTful APIs
+- Linux(Ubuntu)
+- MVC Pattern
+- Unit Test
+### Front-End
 - HTML
 - CSS
 - JavaScript
-- WebSocket
-- Peer.JS (P2P & WebRTC)
-- WebRTC
-
-### Backend
-- Django
-- Django Channels (ASGI)
-- Nginx
-- Docker
+- Ajax
+### Cloud Service (AWS)
+- EC2
+- S3
+- CloudFront
+- RDS (MySQL)
+### Database
+- MySQL
+- Django ORM
 - Redis
-- AWS EC2
-- AWS S3
-- AWS RDS (MySQL)
-- AWS CloudFront
+### Networking
+- HTTP & HTTPS
+- Domain Name System
+- NGINX
+- SSL (SSL For Free)
+- WebSocket, WebRTC
+### Development Tools
+- Docker
+- Git /GitHub
 
 ## Architecture
 ![Light drawio (2)](https://user-images.githubusercontent.com/98375601/222950372-6c0373b2-070e-4b53-92a1-77d8ff6077d0.png)
@@ -31,7 +56,7 @@ Demo link: https://shichenx.com
 
 
 ## Database ER Diagram
-![Light_DBER](https://user-images.githubusercontent.com/98375601/222913206-c2d88f00-d53b-4d4b-8ced-2208baa73ad9.png)
+![Light_DBER](https://user-images.githubusercontent.com/98375601/225050323-02266428-6ca1-445b-ac03-53e80112d4b8.png)
 
 ## Tree-structured Directories
 ```
@@ -119,3 +144,9 @@ light
 Dockerfile
 README.md
 requirements.txt
+```
+
+## Contact
+🧑‍💻 Jesse Hou 侯晨曦
+
+✉ jessehou6@gmail.com
