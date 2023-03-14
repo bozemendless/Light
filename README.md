@@ -16,7 +16,7 @@ Visit the website at https://shichenx.com/
 - Use Django ORM with AWS RDS for MySQL and normalize database in 3NF.
 - Use unit tests to ensure the correctness and robustness.
 
-## Main Technique
+## Main Technologies
 ### Back-End
 - Python Django
 - Python Django Channels (ASGI)
