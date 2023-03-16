@@ -90,8 +90,6 @@ function switchServer() {
             //  check if first time loading this server
             // have ever loaded
             if (serverLoadingStatus[currentServerId]) {
-                console.log("載入過了");
-
                 // first time load
             } else {
                 // create ul
@@ -214,7 +212,6 @@ createServerBtn.addEventListener("click", () => {
         const response = await fetch(serverAPIUrl, options);
         const data = await response.json();
         if (response.ok) {
-            console.log(data.data);
             loadingServerList(data.data);
             editLayer.remove();
             createServerWrapper.remove();
