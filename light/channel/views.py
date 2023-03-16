@@ -104,8 +104,12 @@ def server(request):
                         {
                             'id': str(server.id),
                             'name': server.name,
-                            'creator': server.creator.username,
-                            'members': [member.username for member in server.members.all()],
+                            'creator': {'username': server.creator.username,
+                                            'id': server.creator.id},
+                            'members': [{
+                                        'username': member.username,
+                                        'avatar': member.avatar.url if member.avatar else None,
+                                    } for member in server.members.all()],
                         }
                     ]
                 }
