@@ -1,4 +1,5 @@
 from .models import Account
+from .utils import *
 from channel.models import Server
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
@@ -9,7 +10,6 @@ from dotenv import load_dotenv
 from datetime import timedelta
 import datetime
 import json
-import re
 import jwt
 import os
 
@@ -57,15 +57,7 @@ def register(request):
             password = infos['password']
 
             # Verify the register form
-            email_regex = r'^(?=.{8,64}$)\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$'
-            username_regex = r'^[A-Za-z0-9]{2,32}$'
-            password_regex = r'.{6,72}$'
-
-            is_email_valid = re.search(email_regex, email)
-            is_username_valid = re.search(username_regex, username)
-            is_password_valid = re.search(password_regex, password)
-
-            if not(is_email_valid and is_username_valid and is_password_valid):
+            if not(validate_email(email) and validate_username(username) and validate_password(password)):
                 error = "the fields are not valid"
                 res = {
                     'error': True,
