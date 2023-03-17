@@ -37,17 +37,20 @@ const serverMenu = document.querySelector("#server-menu");
 const avatarWrapper = document.querySelector(".avatar-wrapper");
 
 // Functions
-function init() {
+async function init() {
     switchChannel(); // default is general text channel
 
     // Get user infos
-    getUserData();
+    await getUserData();
 
     // Create My Peer Object
-    peer = createMyPeer();
+    peer = await createMyPeer();
 
     // Preload gif
     preload();
+
+    await serverInit();
+    webSocket = await webSocketConnect();
 }
 
 async function getUserData() {
@@ -130,7 +133,7 @@ function updateAboutMe() {
     aboutMePreview.textContent = aboutMeContent;
 }
 
-function createMyPeer() {
+async function createMyPeer() {
     // Get my peerId
     const peer = new Peer({
         host: "0.peerjs.com",
@@ -448,7 +451,7 @@ function sendMessage(message) {
 }
 
 // WebSocket
-function webSocketConnect() {
+async function webSocketConnect() {
     // Connect to server
     let wsStart = "ws://";
     if (window.location.protocol === "https:") {
