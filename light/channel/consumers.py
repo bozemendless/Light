@@ -119,6 +119,25 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             except Exception as e:
                 print(e)
             
+        if action == 'serverRemoveMember':
+            try:
+                username = receive_data['username']
+                for connection in connections.values():
+                    if connection['username'] == username:
+                        member_channel_name = connection['channel_name']
+                        data = {}
+                        data["server"] = receive_data['serverId']
+                        data['action'] = 'server_delete_member'
+                        await self.channel_layer.send(
+                            member_channel_name,
+                            {
+                                'type': 'server_delete_member',
+                                'data': data,
+                            }
+                        )
+                        break
+            except Exception as e:
+                print(e)
 
         # Chat message
         if action == 'message':
@@ -263,6 +282,14 @@ class ChannelConsumer(AsyncWebsocketConsumer):
         }))
 
     async def server_add_member(self, event):
+        data = event['data']
+
+        await self.send(text_data=json.dumps({
+            'type': 'notification',
+            'data': data,
+        }))
+
+    async def server_delete_member(self, event):
         data = event['data']
 
         await self.send(text_data=json.dumps({
