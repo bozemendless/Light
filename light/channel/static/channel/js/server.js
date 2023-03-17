@@ -219,7 +219,3 @@ createServerBtn.addEventListener("click", () => {
         }
     }
 });
-
-serverInit().then(() => {
-    webSocket = webSocketConnect();
-});

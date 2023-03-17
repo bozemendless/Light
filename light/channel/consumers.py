@@ -2,8 +2,10 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from chats.views import save_chat_logs
 from channels.exceptions import StopConsumer
+from .views import get_server
 
 general_voice_channel_list = []
+connections = {}
 
 class ChannelConsumer(AsyncWebsocketConsumer):
 
@@ -44,12 +46,11 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             }
         )
         # remove from online list
-        
+        if self.channel_name in connections:
+            del connections[self.channel_name]
 
         for user in general_voice_channel_list:
             if user['peer_channel_name'] == self.channel_name:
-
-                print(user)
 
                 data = {
                     'action': 'leave_room',
@@ -85,6 +86,58 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             action = receive_data['action']
         except Exception as e:
             print(e)
+
+        if action == 'login':
+            try:
+                user_id = receive_data['id']
+                username = receive_data['username']
+                connections[self.channel_name] = {
+                    'id': user_id,
+                    'username': username,
+                    'channel_name': self.channel_name,
+                }
+            except Exception as e:
+                print(e)
+
+        if action == 'serverAddMember':
+            try:
+                username = receive_data['username']
+                server_id = receive_data['server']
+                for connection in connections.values():
+                    if connection['username'] == username:
+                        member_channel_name = connection['channel_name']
+                        data = await get_server(server_id)
+                        data['action'] = 'server_add_member'
+                        await self.channel_layer.send(
+                            member_channel_name,
+                            {
+                                'type': 'server_add_member',
+                                'data': data,
+                            }
+                        )
+                        break
+            except Exception as e:
+                print(e)
+            
+        if action == 'serverRemoveMember':
+            try:
+                username = receive_data['username']
+                for connection in connections.values():
+                    if connection['username'] == username:
+                        member_channel_name = connection['channel_name']
+                        data = {}
+                        data["server"] = receive_data['serverId']
+                        data['action'] = 'server_delete_member'
+                        await self.channel_layer.send(
+                            member_channel_name,
+                            {
+                                'type': 'server_delete_member',
+                                'data': data,
+                            }
+                        )
+                        break
+            except Exception as e:
+                print(e)
 
         # Chat message
         if action == 'message':
@@ -221,6 +274,22 @@ class ChannelConsumer(AsyncWebsocketConsumer):
         }))
 
     async def send_channel_list(self, event):
+        data = event['data']
+
+        await self.send(text_data=json.dumps({
+            'type': 'notification',
+            'data': data,
+        }))
+
+    async def server_add_member(self, event):
+        data = event['data']
+
+        await self.send(text_data=json.dumps({
+            'type': 'notification',
+            'data': data,
+        }))
+
+    async def server_delete_member(self, event):
         data = event['data']
 
         await self.send(text_data=json.dumps({

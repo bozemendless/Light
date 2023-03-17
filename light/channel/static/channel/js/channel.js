@@ -37,17 +37,20 @@ const serverMenu = document.querySelector("#server-menu");
 const avatarWrapper = document.querySelector(".avatar-wrapper");
 
 // Functions
-function init() {
+async function init() {
     switchChannel(); // default is general text channel
 
     // Get user infos
-    getUserData();
+    await getUserData();
 
     // Create My Peer Object
-    peer = createMyPeer();
+    peer = await createMyPeer();
 
     // Preload gif
     preload();
+
+    await serverInit();
+    webSocket = await webSocketConnect();
 }
 
 async function getUserData() {
@@ -130,7 +133,7 @@ function updateAboutMe() {
     aboutMePreview.textContent = aboutMeContent;
 }
 
-function createMyPeer() {
+async function createMyPeer() {
     // Get my peerId
     const peer = new Peer({
         host: "0.peerjs.com",
@@ -448,7 +451,7 @@ function sendMessage(message) {
 }
 
 // WebSocket
-function webSocketConnect() {
+async function webSocketConnect() {
     // Connect to server
     let wsStart = "ws://";
     if (window.location.protocol === "https:") {
@@ -459,6 +462,12 @@ function webSocketConnect() {
     webSocket.addEventListener("open", (event) => {
         console.log("webSocket connected");
         isSocketConnect = true;
+        const sendData = {
+            action: "login",
+            id: userId,
+            username: username,
+        };
+        webSocket.send(JSON.stringify(sendData));
     });
 
     webSocket.addEventListener("message", (event) => {
@@ -502,6 +511,17 @@ function webSocketConnect() {
                     },
                 ];
                 showChannelMember("leave_room", members);
+            }
+            if (parsedData.data.action === "server_add_member") {
+                loadingServerList(parsedData.data.data);
+            }
+
+            if (parsedData.data.action === "server_delete_member") {
+                const removedServerName =
+                    serverMembers[parsedData.data.server].name;
+                const alertMessage = `你被移出了 ${removedServerName} 伺服器。`;
+                alert(alertMessage);
+                location.reload();
             }
         }
     });
@@ -1023,7 +1043,19 @@ hamburger.addEventListener("click", () => {
                 editLayer.remove();
                 addMemberWrapper.remove();
                 const memberData = await getMemberData(member);
-                serverMembers[server].member.push(memberData);
+                if (
+                    !serverMembers[server].member.some(
+                        (member) => member.username === memberData.username
+                    )
+                ) {
+                    serverMembers[server].member.push(memberData);
+                }
+                const sendData = {
+                    action: "serverAddMember",
+                    server: server,
+                    username: member,
+                };
+                webSocket.send(JSON.stringify(sendData));
             }
             isSubmitting = false;
         }
@@ -1098,24 +1130,20 @@ hamburger.addEventListener("click", () => {
         });
         deleteMemberList.addEventListener("click", async (event) => {
             if (event.target.className === "delete-button") {
+                const deletedUsername =
+                    event.target.getAttribute("data-delete-button");
                 const deleteResult = await deleteMember(
                     currentServerId,
-                    event.target.getAttribute("data-delete-button")
+                    deletedUsername
                 );
                 if (deleteResult) {
-                    alert(
-                        `移除使用者 ${event.target.getAttribute(
-                            "data-delete-button"
-                        )} 成功！`
-                    );
+                    alert(`移除使用者 ${deletedUsername} 成功！`);
                     // editLayer.remove();
                     // deleteMemberWrapper.remove();
                     const index = serverMembers[
                         currentServerId
                     ].member.findIndex(
-                        (member) =>
-                            member.username ===
-                            event.target.getAttribute("data-delete-button")
+                        (member) => member.username === deletedUsername
                     );
 
                     serverMembers[currentServerId].member.splice(index, 1);
@@ -1123,6 +1151,13 @@ hamburger.addEventListener("click", () => {
                     event.target.parentNode.parentNode.removeChild(
                         event.target.parentNode
                     );
+
+                    const sendData = {
+                        action: "serverRemoveMember",
+                        username: deletedUsername,
+                        serverId: currentServerId,
+                    };
+                    webSocket.send(JSON.stringify(sendData));
                 }
             }
         });

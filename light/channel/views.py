@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import os
 from . models import Server
 from accounts.models import Account
+from channels.db import database_sync_to_async
 
 load_dotenv()
 jwt_secret_key = os.getenv('JWT_SECRET_KEY')
@@ -263,3 +264,22 @@ def server_members(request):
 
     else: # Method not allowed
         return JsonResponse({}, status=405)
+    
+@database_sync_to_async
+def get_server(server_id):
+    server = Server.objects.get(id=server_id)
+    data = {
+        'data':[
+            {
+                'id': str(server.id),
+                'name': server.name,
+                'creator': {'username': server.creator.username,
+                                'id': server.creator.id},
+                'members': [{
+                            'username': member.username,
+                            'avatar': member.avatar.url if member.avatar else None,
+                        } for member in server.members.all()],
+            }
+        ]
+    }
+    return data
