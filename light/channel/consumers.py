@@ -46,10 +46,8 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             }
         )
         # remove from online list
-        for user_id, user_data in connections.items():
-            if user_data['channel_name'] == self.channel_name:
-                del connections[user_id]
-                break
+        if self.channel_name in connections:
+            del connections[self.channel_name]
 
         for user in general_voice_channel_list:
             if user['peer_channel_name'] == self.channel_name:
@@ -93,7 +91,7 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             try:
                 user_id = receive_data['id']
                 username = receive_data['username']
-                connections[user_id] = {
+                connections[self.channel_name] = {
                     'id': user_id,
                     'username': username,
                     'channel_name': self.channel_name,
@@ -105,9 +103,9 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             try:
                 username = receive_data['username']
                 server_id = receive_data['server']
-                for user_id, user_data in connections.items():
-                    if user_data['username'] == username:
-                        member_channel_name = user_data['channel_name']
+                for connection in connections.values():
+                    if connection['username'] == username:
+                        member_channel_name = connection['channel_name']
                         data = await get_server(server_id)
                         data['action'] = 'server_add_member'
                         await self.channel_layer.send(
