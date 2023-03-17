@@ -215,7 +215,6 @@ createServerBtn.addEventListener("click", () => {
             loadingServerList(data.data);
             editLayer.remove();
             createServerWrapper.remove();
-            webSocket.send("message");
             return;
         }
     }

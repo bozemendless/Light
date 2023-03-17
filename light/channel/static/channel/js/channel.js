@@ -462,6 +462,12 @@ async function webSocketConnect() {
     webSocket.addEventListener("open", (event) => {
         console.log("webSocket connected");
         isSocketConnect = true;
+        const sendData = {
+            action: "login",
+            id: userId,
+            username: username,
+        };
+        webSocket.send(JSON.stringify(sendData));
     });
 
     webSocket.addEventListener("message", (event) => {
@@ -505,6 +511,9 @@ async function webSocketConnect() {
                     },
                 ];
                 showChannelMember("leave_room", members);
+            }
+            if (parsedData.data.action === "server_add_member") {
+                loadingServerList(parsedData.data.data);
             }
         }
     });
@@ -1026,7 +1035,19 @@ hamburger.addEventListener("click", () => {
                 editLayer.remove();
                 addMemberWrapper.remove();
                 const memberData = await getMemberData(member);
-                serverMembers[server].member.push(memberData);
+                if (
+                    !serverMembers[server].member.some(
+                        (member) => member.username === memberData.username
+                    )
+                ) {
+                    serverMembers[server].member.push(memberData);
+                }
+                const sendData = {
+                    action: "serverAddMember",
+                    server: server,
+                    username: member,
+                };
+                webSocket.send(JSON.stringify(sendData));
             }
             isSubmitting = false;
         }
