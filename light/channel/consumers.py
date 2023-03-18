@@ -33,6 +33,20 @@ class ChannelConsumer(AsyncWebsocketConsumer):
                 }
             )
 
+        # send channel_name
+        data = {
+            'action': 'self_channel_name',
+            'channel_name': self.channel_name,
+        }
+
+        await self.channel_layer.send(
+            self.channel_name,
+            {
+                'type': 'notification',
+                'data': data
+            }
+        )
+
     async def disconnect(self, close_code):
         data = {
             'action': 'leave',
