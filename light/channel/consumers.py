@@ -155,7 +155,7 @@ class ChannelConsumer(AsyncWebsocketConsumer):
                 await self.channel_layer.group_send(
                     self.room_group_name,
                     {
-                        'type': 'notification',
+                        'type': 'send_message',
                         'data': data,
                     }
                 )
@@ -266,10 +266,18 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             'data': data,
         }))
 
-    async def notification(self, event):
+    async def send_message(self, event):
         data = event['data']
 
         await self.send(text_data=json.dumps({
             'type': 'message',
+            'data': data,
+        }))
+
+    async def notification(self, event):
+        data = event['data']
+
+        await self.send(text_data=json.dumps({
+            'type': 'notification',
             'data': data,
         }))
