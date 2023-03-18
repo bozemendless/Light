@@ -28,7 +28,7 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.send(
                 self.channel_name,
                 {
-                    'type': 'send_channel_list',
+                    'type': 'notification',
                     'data': data
                 }
             )
@@ -65,7 +65,7 @@ class ChannelConsumer(AsyncWebsocketConsumer):
                 await self.channel_layer.group_send(
                         self.room_group_name,
                         {
-                            'type': 'send_channel_list',
+                            'type': 'notification',
                             'data': data
                         }
                     )
@@ -111,7 +111,7 @@ class ChannelConsumer(AsyncWebsocketConsumer):
                         await self.channel_layer.send(
                             member_channel_name,
                             {
-                                'type': 'server_add_member',
+                                'type': 'notification',
                                 'data': data,
                             }
                         )
@@ -131,7 +131,7 @@ class ChannelConsumer(AsyncWebsocketConsumer):
                         await self.channel_layer.send(
                             member_channel_name,
                             {
-                                'type': 'server_delete_member',
+                                'type': 'notification',
                                 'data': data,
                             }
                         )
@@ -150,11 +150,12 @@ class ChannelConsumer(AsyncWebsocketConsumer):
                 data['username'] = username
                 data['message'] = message
                 data['server'] = server_id
+                data['channel_name'] = self.channel_name
 
                 await self.channel_layer.group_send(
                     self.room_group_name,
                     {
-                        'type': 'send_message',
+                        'type': 'notification',
                         'data': data,
                     }
                 )
@@ -214,7 +215,7 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
-                    'type': 'send_channel_list',
+                    'type': 'notification',
                     'data': data
                 }
             )
@@ -265,35 +266,10 @@ class ChannelConsumer(AsyncWebsocketConsumer):
             'data': data,
         }))
 
-    async def send_message(self, event):
+    async def notification(self, event):
         data = event['data']
 
         await self.send(text_data=json.dumps({
             'type': 'message',
             'data': data,
         }))
-
-    async def send_channel_list(self, event):
-        data = event['data']
-
-        await self.send(text_data=json.dumps({
-            'type': 'notification',
-            'data': data,
-        }))
-
-    async def server_add_member(self, event):
-        data = event['data']
-
-        await self.send(text_data=json.dumps({
-            'type': 'notification',
-            'data': data,
-        }))
-
-    async def server_delete_member(self, event):
-        data = event['data']
-
-        await self.send(text_data=json.dumps({
-            'type': 'notification',
-            'data': data,
-        }))
-
