@@ -12,6 +12,7 @@ let isSocketConnect = false;
 let currentInChanneL;
 const channelMap = {};
 let webSocket;
+let selfChannelName;
 
 // P2P connection & WebRTC
 let peer;
@@ -477,7 +478,7 @@ async function webSocketConnect() {
         if (parsedData.type === "message") {
             const arr = [parsedData.data];
             if (
-                arr[0]["username"] === username && // self's message
+                arr[0]["channel_name"] === selfChannelName && // self's message
                 serverLoadingStatus[arr[0]["server"]] // already loading
             ) {
                 return;
@@ -491,8 +492,7 @@ async function webSocketConnect() {
             if (parsedData.data.action === "channel_list") {
                 const members = parsedData.data.general_voice_channel;
                 showChannelMember("join_room", members);
-            }
-            if (parsedData.data.action === "join_room") {
+            } else if (parsedData.data.action === "join_room") {
                 const members = [
                     {
                         peer_username: parsedData.data.peer_username,
@@ -501,8 +501,7 @@ async function webSocketConnect() {
                     },
                 ];
                 showChannelMember("join_room", members);
-            }
-            if (parsedData.data.action === "leave_room") {
+            } else if (parsedData.data.action === "leave_room") {
                 const members = [
                     {
                         peer_username: parsedData.data.peer_username,
@@ -511,17 +510,16 @@ async function webSocketConnect() {
                     },
                 ];
                 showChannelMember("leave_room", members);
-            }
-            if (parsedData.data.action === "server_add_member") {
+            } else if (parsedData.data.action === "server_add_member") {
                 loadingServerList(parsedData.data.data);
-            }
-
-            if (parsedData.data.action === "server_delete_member") {
+            } else if (parsedData.data.action === "server_delete_member") {
                 const removedServerName =
                     serverMembers[parsedData.data.server].name;
                 const alertMessage = `你被移出了 ${removedServerName} 伺服器。`;
                 alert(alertMessage);
                 location.reload();
+            } else if (parsedData.data.action === "self_channel_name") {
+                selfChannelName = parsedData.data.channel_name;
             }
         }
     });
