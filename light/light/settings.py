@@ -154,13 +154,17 @@ USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 
-# STATIC_URL = 'static/'
-STATIC_URL = static_url
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-    ]
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+if DEBUG:
+    STATIC_URL = 'static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+else:
+    STATIC_URL = static_url
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'static'),
+        ]
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
