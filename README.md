@@ -2,8 +2,6 @@
  
 Light is a community-oriented instant messaging platform inspired by Discord's design. It allows members to create servers and communicate in channel of each server freely via messages, video, and audio. 
 
-Visit the website at https://shichenx.com/
-
 ![shichenx com_ (2)](https://user-images.githubusercontent.com/98375601/225050405-9784ec7c-a28a-4225-983b-33dd56ad8ade.png)
 
 ## Main Freatures
