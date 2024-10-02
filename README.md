@@ -1,4 +1,6 @@
 ﻿# Light
+
+This was my very first attempt at coding. I know it's filled with lots of shit, but I just don't want to erase my journey. Maybe one day I'll come back and refactor it... but for now, it stays as a testament to how far I've come. 
  
 Light is a community-oriented instant messaging platform inspired by Discord's design. It allows members to create servers and communicate in channel of each server freely via messages, video, and audio. 
 
